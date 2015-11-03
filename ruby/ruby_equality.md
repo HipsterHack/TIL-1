@@ -100,6 +100,10 @@ Object에 있는 메소드이기때문에 사용은 할 수가 있는데. Object
   end
 ```
 
+### String
+
+* 루비의 String은 ==, ===가 동일한 구현을 사용한다.
+
 ## 참고 
 * [스택오버플로우 질문](http://stackoverflow.com/questions/7156955/whats-the-difference-between-equal-eql-and)
 * [루비 공식 API 문서](http://ruby-doc.org/core-2.2.3/Object.html#method-i-eql-3F)
