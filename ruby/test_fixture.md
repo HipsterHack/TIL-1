@@ -101,7 +101,29 @@ fixture로 belongs_to, has_one, has_many 관계가 있다고 생각하자. 레�
 	  name: Judgement
 
 user 클래스 객체에서 job에 접근을 할 수 있다. users 테이블에서 보면 job_id 가 정의되어 있는데 job_id는 jobs fixture에 들어간 id나 레일즈가 자동으로 생성한 id가 들어가는걸 볼 수 있다. 자동으로 모든 세팅을 레일즈가 해준다. 
- 
+
+모델에 관계 설정은 없고, id 값을 가져다 써야할 땐 어떻게 할까? 이럴땐 ActiveRecord::FixtureSet.identify() 를 사용할 수 있다. Fixture의 label로 레일즈가 어떤 id를 넣었는지 알수 있다.
+아래 처럼 사용하면 된다.
+
+	# users.yml
+	daniel:
+	  name: Daniel
+	  job_id: <%= ActiveRecord::FixtureSet.identify(:programmer)
+	  workplace : google
+	kim:
+	  name: Kim
+	  job_id: <%= ActiveRecord::FixtureSet.identify(:programmer)
+	  workplace : google
+	son:
+	  name: son
+	  job_id: <%= ActiveRecord::FixtureSet.identify(:judgement)
+	  workplace: unknown
+
+	# jobs.yml
+	programmer:
+	  name: Programmer
+	judgement:
+	  name: Judgement
 
 
 ### 참고자료
