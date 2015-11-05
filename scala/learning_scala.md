@@ -78,7 +78,7 @@ $ touch project_name/plugins.sbt
 
 ```
 addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "4.0.0")
-``
+```
 4) 프로젝트 루트로 이동한뒤 프로젝트를 생성한다
 ```
 sbt eclipse
