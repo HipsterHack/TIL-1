@@ -93,9 +93,3 @@ sbt, scala는 버전이 맞지 않으면 정상 동작 하지 않는다.
 ## 공부하기 좋은 자료들
 * [Scala school](https://twitter.github.io/scala_school/ko/basics.html)
 * [Effective scala](http://twitter.github.io/effectivescala/)
-
-
-
-## 공부하기 좋은 자료들
-* [Scala school](https://twitter.github.io/scala_school/ko/basics.html)
-* [Effective scala](http://twitter.github.io/effectivescala/)
