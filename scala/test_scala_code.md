@@ -258,9 +258,9 @@ libraryDependencies += "org.scalamock" %% "scalamock-scalatest-support" % "3.2" 
 ```
 
 ### 참고 
-[BDD](http://blog.jaigurudevaom.net/319)
-[TDD BDD 차이점](http://blog.aliencube.org/ko/2014/04/02/differences-between-bdd-and-tdd/)
-[스칼라 테스트 스타일](http://www.scalatest.org/user_guide/selecting_a_style)
-[테스트 픽스쳐](http://stackoverflow.com/questions/16367489/initialize-val-on-a-scalatest-fixture)
-[스칼라Mock](http://scalamock.org/quick-start/)
+* [BDD](http://blog.jaigurudevaom.net/319)
+* [TDD BDD 차이점](http://blog.aliencube.org/ko/2014/04/02/differences-between-bdd-and-tdd/)
+* [스칼라 테스트 스타일](http://www.scalatest.org/user_guide/selecting_a_style)
+* [테스트 픽스쳐](http://stackoverflow.com/questions/16367489/initialize-val-on-a-scalatest-fixture)
+* [스칼라Mock](http://scalamock.org/quick-start/)
 
