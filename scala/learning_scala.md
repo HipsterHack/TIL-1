@@ -56,6 +56,60 @@ class Soinata extends Car with Hyundi with Tunable {
 추상 클래스의 생성자는 매개변수를 받을 수 있다 하지만 트레잇의 생성자는 매개변수를 못받는다.
 예를 들어 trait t(i: Int) {} 에서 i 매개변수는 문법상 못쓴다.
 
+## 스칼라 scope
+
+스칼라는 access 수정자를 제공한다. 
+private[], protected[]의 형태로 제공한다. 
+
+이 access 수정자는 현재 패키지, 클래스 내부에서만 접근을 설정할 수 있다. 
+
+```
+package currency {
+  package koreaCurrency {
+    class KoreanWon {
+      private[currency] var amount = null;
+      private[koreanCurrency] var amountByWon = null;
+      prviate[this] var original null;
+     }
+  }
+}
+
+```
+
+위의 예시에서 
+* amount는 currency 패키지 내부에서 접근이 가능하고, 
+* amountByWon는 koreaCurrency 패키지 내부에서 접근 가능하며,
+* this는 현재 object에서만 접근이 가능하다(같은 클래스인 다른 오브젝트에서 접근하려면 오류가 난다.)
+
+### 루프
+
+스칼라는 루프를 3개 제공한다. 
+for, while, do-while.
+Java와 다르게 for는 :대신 <-로 표현한다. 그리고 c, c++ 스타일의 :을 사용하는 대신,
+to를 이용해서 루프를 돈다.
+
+* for 예제 
+```
+  for(current <- args) {
+    println(current)
+  }
+  for( idx <- 0 to 1000){
+  	// 뭔가 처리함.
+  }
+```  
+* while 예제
+```
+while ( i > 20 ){ 
+  // 뭔가 처리함
+  
+}
+```
+List 같은 클래스는 foreach를 제공함으로써 함수형 프로그래밍 형태를 지원한다. 
+
+```
+ nums.foreach((i: Int) => i * 3)
+```
+
 
 ## sbt를 사용한 이클립스용 스칼라 세팅 
 
