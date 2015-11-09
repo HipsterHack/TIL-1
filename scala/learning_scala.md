@@ -40,6 +40,11 @@ object Money{
 }
 ```
 
+## 데이터 타입 
+
+( 추후 정리 예정)
+
+
 ## 트레잇
 
 인터페이스 대용으로 나온것이다. 여러개를 섞을 수 있다.
@@ -251,6 +256,24 @@ delayedPass(calculate())
   println(createKeyWithPrefixBound("3")) // prefix_3
 ```
 
+## String
+
+## Collection
+
+## Array
+
+### 유용한 함수들(static 형태로 제공함)
+
+### List
+* immutable
+
+### Map
+
+### Set
+
+###
+
+
 
 ## sbt를 사용한 이클립스용 스칼라 세팅 
 
@@ -288,3 +311,4 @@ sbt, scala는 버전이 맞지 않으면 정상 동작 하지 않는다.
 ## 공부하기 좋은 자료들
 * [Scala school](https://twitter.github.io/scala_school/ko/basics.html)
 * [Effective scala](http://twitter.github.io/effectivescala/)
+* [Scala Tutorial](http://www.tutorialspoint.com/scala) : 쉽게 볼 수있는 스칼라 튜토리얼, 문법을 찬찬히 살펴볼때 좋다. 
