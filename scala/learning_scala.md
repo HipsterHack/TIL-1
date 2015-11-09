@@ -96,7 +96,22 @@ to를 이용해서 루프를 돈다.
   for( idx <- 0 to 1000){
   	// 뭔가 처리함.
   }
-```  
+```
+
+* for yield 예제
+
+```
+numList = List(1,2,3,4,5,6,7,8,9,10)
+var retVal = for { var a <- numList 
+                   if != 3 ; if 1 < 8
+                 } yield a
+```
+
+스칼라는 위 예제에서 retVal은 numList와 같은 타입으로 저장한다.
+
+yield 옆의 a는 저장할 형태의 expression이다.
+
+
 * while 예제
 ```
 while ( i > 20 ){ 
@@ -108,6 +123,132 @@ List 같은 클래스는 foreach를 제공함으로써 함수형 프로그래밍
 
 ```
  nums.foreach((i: Int) => i * 3)
+```
+
+#### Breaks
+
+자바의 break문은 없다. break 객체가 있을 뿐이다.
+
+breakable은 break 범위를 설정해주는 것. break 하면 어디로 갈지를 정해준다.
+
+```
+import scala.util.control._
+
+
+var loop = new Breaks
+val myList = List(1,2,3,4,5)
+loop.breakable { 
+  for ( i <- myList){
+    if (i > 3)
+      loop.break;
+  }
+}
+```
+### 스칼라 method and function
+
+메소드는 클래스의 일부분이다. 목적을 이루기 위한  문장의 집합이 메소드.
+함수는 method와 약간의 차이만 있다. object의 멤버이면서 변수에 할당되었으면 function. bytecode 레벨까지 내려가야 정확하게 함수, 메소드 구분을 할 수 있다.
+
+
+#### 정의 
+
+아래와 같은 형태로 정의 한다
+
+```
+def plus(a : Int, b : Int) : Int = a + b
+
+def plus(a : Int, b : Int) : Int = {
+  a + b
+}
+```
+
+#### 기본값 있는 함수
+
+```
+def plus(a : Int = 1 , b : Int = 2) : Int = a + b
+
+
+println( plus() ) // 3
+
+```
+
+#### nested function 중첩함수 
+
+* 함수안의 함수.
+
+```
+object Test{
+  def main( args : Array[String]){
+    println( factorial(0))
+  }	
+
+  def factorial(i : Int) : Int = {
+    def fact(i : Int, accumulator: Int): Int = {
+      if ( i <= 1 )
+        accumulator
+      else 
+      	fact(i - 1, i * accumulator)  
+    }
+  }
+}
+```
+
+### 익명 함수 및 클로저
+
+
+```
+ var decrease = (x: Int, min: Int) => x - min
+ decrease(6, 1) // 5
+```
+
+여기에 함수 밖에 선언된 변수명 등을 가져와서 사용하면 closure가 된다. (당연한가?)
+
+```
+ val min = 1
+ var decrease = (x: Int) => x - min
+
+
+ decrease(6) // 5
+```
+
+
+### call by name
+
+call by name 순수 언어론자들이 가장 좋아하는 (물론 성능은 차치하고)방식의 파라미터 전달이다.
+코드 블록을 호출한 함수로 전달하고, 전달 받았을때 파라미터에 접근하는 방식. 함수 실행 타이밍에 값을 계산한다.
+
+
+```
+def calculate () = {
+  println("calculate..")
+  1 + 1	
+}
+def delayedPass( calculate: => Int ) = {
+  println("delayedPass..")
+  println(calculate)	
+}
+
+// 실행함수에서
+delayedPass(calculate())
+
+```
+
+### 부분 적용 함수
+
+파라미터를 미리 bind할 수 있는 경우 사용한다.
+아래 예제를 참고해보자.
+(예제 설명: 키 생성할때, prefix가 있어서 무조건 반영해야할 경우, 아래처럼 미리 바인딩을 할 수 있다.)
+
+```
+  def createKey(prefix:String, postfix: String) = {
+    prefix + postfix
+  }
+  // 실행함수 
+  val prefix:String = "prefix_"
+  val createKeyWithPrefixBound = createKey(prefix, _ : String)
+  println(createKeyWithPrefixBound("1")) // prefix_1
+  println(createKeyWithPrefixBound("2")) // prefix_2
+  println(createKeyWithPrefixBound("3")) // prefix_3
 ```
 
 
