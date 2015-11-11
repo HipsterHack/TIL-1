@@ -258,9 +258,87 @@ delayedPass(calculate())
 
 ## String
 
+* 스칼라의 String은 java.lang.String  에서 가져왔다. 
+* 그래서 스칼라 String은 immutable이다. 
+* 두개의 호환이 자연스러운 편이다.
+
+아래는 예제다.
+```
+object Main{
+  def main(args : Array[String]){
+    val greeting : String = "test"
+    println(greeting)
+  }
+}
+```
+
+* 문자열 생성하는 법은 두가지이다. 한가지는 타입을 선언, 다른 한가지는 타입을 적지 않는 암묵적 방법이다.
+
+```
+  val greeting = "test"
+  val greeting2: String = "test"
+```
+* 자바랑 다른 점은 length가 메소드로 제공한다.
+* + 연산자와 concat도 제공한다.
+
 ## Collection
 
 ## Array
+
+* 간단히 배열이다.
+* 고정 크기 배열이다. 동일 타입의 고정 데이터를 만들때 주로 사용한다
+
+```
+var arr:Array[String] = new Array[String](10)
+
+var arr2 = new Array[String](10)
+```
+
+* 요소에 접근 지정하는 방식이 자바랑 다르다.
+* [] 대신 ()를 쓴다 (선언도 그래서 ()를 쓴다)
+
+```
+var arr3 = Array(1,2,3,4,5)
+arr3(0) // 1
+```
+
+#### 다중 배열 
+
+* Array.ofDim을 사용한다.
+```
+import Array._
+
+  var matrix = ofDim[Int](10,10) 
+  matrix(0,0) // 0, 0 번째 접근
+```
+#### 배열 두개 붙이기
+
+* Array.concat을 이용한다.
+```
+import Array._
+var list = Array(1,2,3,4)
+var list2 = Array(5,6,7)
+var list3 = concat(list, list2)
+```
+
+#### for 루프
+
+* 아래 처럼 사용하면 된다. 
+
+```
+var list = Array(1,2,3,4)
+var list2 = Array(5,6,7)
+
+for ( data <- list ){
+  println(" " + data)
+}
+
+for (data <- 0 to list2.length()){
+  println(" " + data)
+}
+
+```
+
 
 ### 유용한 함수들(static 형태로 제공함)
 
