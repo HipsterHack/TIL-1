@@ -349,9 +349,54 @@ for (data <- 0 to list2.length()){
 
 ### Set
 
-###
+* 중복 없는 리스트다. 
+* 리스트에서 중복을 제거해야할 때 set을 이용한다.
+* 스칼라 리스트와의 차이점은 mutable, immutable 두가지 형태가 존재한다.
+* import scala.collection.mutable.Set
+
+```
+// Empty set of integer type
+var s : Set[Int] = Set()
+
+// Set of integer type
+var s : Set[Int] = Set(1,3,5,7)
 
 
+var s2 = Set(1,3,5,7)
+```
+
+* head, tail, isEmpty 함수를 기본으로 제공한다.
+* 최대 최소를 구하는 메소드를 제공한다. min, max
+
+
+#### Set 끼리 합치기
+++ 연산을 사용한다.
+
+```
+val money = Set("cash", "check")
+val money2 = Set("bitCoin")
+
+var concated_set = money ++ money2
+
+for (el <- concated_set){
+  println(el)
+}
+```
+
+* 두 Set의 차집합 연산(-)도 제공한다. 
+
+#### 공통요소 찾기
+
+* 두 Set의 공통 요소를 찾을 수 있다.
+* intersect, & 연산자를 이용해서 공통 요소를 뽑을 수 있다.
+
+```
+ val numset1 = Set(1,2,3,4,5)
+ val numset2 = Set(3)
+
+ println(numset1.&(numset2))
+ println(numset1.intersect(numset2))
+```
 
 ## sbt를 사용한 이클립스용 스칼라 세팅 
 
