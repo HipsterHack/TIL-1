@@ -347,6 +347,101 @@ for (data <- 0 to list2.length()){
 
 ### Map
 
+* key value pair 를 가지고 있는 컬렉션이다.
+* 이 pair를 찾는 기준은 key이다
+* key는 unique해야한다.
+* mutable, immutable 두 가지가 있다.
+* import scala.collection.mutable.Map 를 사용할 수 있다.
+
+
+#### 선언 방법
+
+```
+import scala.collection.mutable.Map 
+//  중략
+var lookupTable: Map[String,Int] = Map()
+
+val colormap = Map ("black" => "#000000", "red" => "#FF0000")
+```
+
+위와 같다.
+
+#### Map에 요소를 추가하는 방법
+
+* + 연산자를 사용한다. 아래 예제를 보면 명확하다
+
+```
+lookupTable += ('max.pager.size' -> 10000)
+lookupTable += ('window.size' -> 5)
+```
+
+#### 두개의 맵을 합치는 방법
+* ++ 연산자를 이용한다. 
+```
+val colormap1 = Map ("black" => "#000000", "red" => "#FF0000")
+val colormap2 = Map ("white" => "#FFFFFF")
+
+var combinedColorMap = colormap1 ++ colormap2
+var combinedColorMap2 = colormap1.++(colormap2)
+```
+
+* Map의 반복자는 foreach 메소드를 제공한다
+* 이 foreach 메소드는 클로저를 이용한다. 
+
+```
+val colormap1 = Map ("black" => "#000000", "red" => "#FF0000")
+
+colormap1.keys.foreach {
+	i =>  print("Key" + i + " value="  + colormap1(i))
+}
+```
+
+#### Map 참고
+
+[http://www.tutorialspoint.com/scala/scala_maps.htm](http://www.tutorialspoint.com/scala/scala_maps.htm)
+
+
+### Tuple
+
+* 자바에는 기존에 튜플이 존재하지 않았다. 만들려면 신규로 object로 만들어야 했다.
+* 이름이 없거나 알수 없는 데이터의 묶음을 이 자료형으로 만드는것도 괜찮다.
+* 튜플은 고정 개수 요소가 합쳐 하나로 보는 것이다 
+* 선언은 아래와 같이 할 수 있다
+* 요소가 두개면 Tunple, 세개면 Tuple3
+
+```
+val helloInfo = (10, "hello", 100)
+val helloInfo2 = new Tuple3(10, "hex", 100)
+```
+
+* 이 자료구조를 기본으로 spark 가 만들어졌다
+
+#### 튜플의 각 요소에 access 하는 법
+
+* _숫자 형태로 각 요소에 접근한다.
+
+```
+helloInfo._1 // 10
+helloInfo._2 // "hello"
+```
+
+#### 리스트처럼 순차적으로 접근하는 방법
+
+* productIterator 메소드를 이용한다
+
+```
+val helloInfo2 = new Tuple3(10, "hex", 100)
+helloInfo2.productIterator.foreach { i => println("value = " + i)}
+```
+
+
+#### Map 참고
+
+[http://www.tutorialspoint.com/scala/scala_maps.htm](http://www.tutorialspoint.com/scala/scala_maps.htm)
+
+
+
+
 ### Set
 
 * 중복 없는 리스트다. 
