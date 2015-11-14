@@ -343,7 +343,56 @@ for (data <- 0 to list2.length()){
 ### 유용한 함수들(static 형태로 제공함)
 
 ### List
-* immutable
+* 리스트는 자바의 리스트와는 달리 immutable이다.. 
+* 아래와 같이 선언 가능하다.
+
+```
+val nums: List[String] = List(1,2,3,4,5)
+val empty : List[Nothing] = List()
+```
+
+* 다차원 리스트도 만들수가 있다.
+
+```
+val = dim: List[List[Int]] = 
+   List ( 
+     List(1, 0, 0),
+     List(0, 1, 0),
+     List(0, 0, 1)
+   )
+```   
+
+### :: 연산  ( 요소 붙이기 연산)
+* 리스트를 만들때 :: 를 붙여서 만들수도 있다.
+* 다만 맨 마지막에 Nil 을 붙여줘야한다.(괄호까지 붙여야 하니, 괄호치다 한 세월이겠다)
+```
+ val nums = 1 :: ( 2 :: ( 3:: Nil)))
+```
+### tabulate 함수
+* 리스트를 만들어주는 일종의 factory이다
+* 파리미터에 입력한 숫자 만큼의 개수의 리스트를 만든다.
+* curried function 형태로 만들 수도 있음
+* 0부터 입력이 시작된다.
+```
+//1,2,3,4,5
+ val list = List.tabulate(5) {x => x+1} 
+ 
+ //List(List(1, 1), List(2, 2), List(3, 3), List(4, 4), List(5, 5))
+ val list = List.tabulate(5,2) {(x:Int, y:Int) => x+1}
+ 
+```
+
+### fill 함수
+* 리스트를 만들어주는 일종의 factory이다
+* 특정 값으로 채워진 함수로 만들 수 있음
+* curried function 형태로 만들 수도 있음
+
+```
+ val list = List.fill(3)(false) // false,false,false
+ val list2 = List.fill(2){ 1 } // 1, 1
+ 
+```
+
 
 ### Map
 
