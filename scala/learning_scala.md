@@ -44,6 +44,31 @@ object Money{
 
 ( 추후 정리 예정)
 
+## case class
+
+* 쉽게 데이터를  저장하기 위해 만들어졌다. (자바빈 대신으로 쓸 수 있다?!)
+* 그리고 그 데이터에 따라 match를 하고 싶을 때 사용한다.
+* new 를 쓰지 않고 instance생성 할 수 있다.
+* toString, equals 함수를 자동으로 생성한다.
+
+
+### 예제
+```
+case class SmartPhone(brand: String, model:String)
+val samasungS5 = SmartPhone("Samasung", "SG-180")
+val ioPhone = SmartPhone("IO", "IO-B21")
+
+
+def createModel(smartPhone:SmartPhone) = smartPhone match {
+  case SmartPhone("Samasung", "SG-180") => "SamaSung S5"
+  case SmartPhone("IO", "IO-B21") => "IoPhone 2"
+  case _ => "Unknown this phone."
+}
+```
+
+
+
+
 
 ## 트레잇
 
