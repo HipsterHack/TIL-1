@@ -566,6 +566,31 @@ for (el <- concated_set){
  println(numset1.&(numset2))
  println(numset1.intersect(numset2))
 ```
+## Option
+
+* Option은 값의 존재를 알려주는 데이터 타입이다.
+* Some[T] or None의 값을 가진다. T는 임의의 템플릿이다.
+
+* Map을 사용할때 주로 Option을 이용한다.
+* 값이 없을때 기본 값으로 리턴할 때 쓴다. 
+
+```
+object Test {
+  def main (args : Array[String]){
+    val params = Map("page" -> 1)
+
+    // page 키가 있으면 page 값 출력 없으면 기본값출력
+    println ("page=" + defaultPage(params.get("page")))
+    // None이 출력
+    println ("pageSize=" + params.get("pageSize").getOrElse(10))
+  }
+
+  def defaultPage(param:Option[Any]) = param match {
+    case Some(something) => something
+    case None => 1
+  }
+}
+```
 
 ## sbt를 사용한 이클립스용 스칼라 세팅 
 
