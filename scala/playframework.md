@@ -19,7 +19,7 @@
 #### 여러 개의 JDK 설치 한 경우
 * Windows에서 발생했다.
 * 최근에 설치한 JDK(1.8)와 JAVA_HOME Path(1.7)가 다르면 버전 지원 불가능하다는 문제가 발생한다
-** Unsupported major.minor version 52.0이런 오류가 발생한다.
+* Unsupported major.minor version 52.0이런 오류가 발생한다.
 * 발생하는 원인은 JRE와 Play 라이브러리가 충돌을 일으키는 듯하다.
 * 커맨드로 띄운 JRE(1.8)가 JAVA_HOME 설정을 사용하는 녀석과 버전 차이가 생기니 발생하는 듯.
-
+* 참고: (http://stackoverflow.com/questions/22489398/unsupported-major-minor-version-52-0)
