@@ -51,6 +51,8 @@ object Average {
 * Map을 써서 중복이 여부를 확인
 * O(N)의 시간 복잡도를 가짐
 * 공간 복잡도는 (Int byte + boolean byte + map 버킷 크기)  * N
+
+##### imperative Style
 ```
 
 import scala.collection.mutable.Map
@@ -78,6 +80,37 @@ object DuplicatedNumbers {
   }
 }
 ```
+#### 약간 더 functional style
+```
+
+
+import scala.collection.mutable.Map
+
+object DuplicatedNumbers {
+  def findDuplicatedNumber( numbers: Array[Int]) : Option[Int] = {
+    var numberMap: Map[Int,Boolean] = Map()
+    numbers.foreach(num => 
+      if (numberMap contains num ){
+        return Some(num)  
+      }
+      else{
+        numberMap(num) = true
+      }
+    )
+    None
+  }
+
+  def main (args : Array[String]) = {
+    println(findDuplicatedNumber(Array(1,2,3,4,4)).get)
+    println(findDuplicatedNumber(Array(3,2,5,1,3,4)).get)
+
+  }
+}
+```
+
+
 #### 느낀점 또는 개선점 
 * 코드를 좀 더 간단하게 만들 수 있을까?
 * FoldLeft같은 걸 이용해서 성능을 개선할 수 있다(공간복잡도 문제 해결)
+* Map을 안쓰고 만들 수 있는 방법은 없을까?
+* 
