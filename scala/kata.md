@@ -173,7 +173,29 @@ class ImageRatioTest extends FunSuite {
 }
 ```
 
-## 느낀점 또는 개선점
+#### 느낀점 또는 개선점
 * for loop를 벗어나서 함수형 스타일로 옮길 수 있을까?
 * 소수가 아닌 이상 1부터 시작하면 값이 커질 수 있으므로 가장 큰 수에서 부터 돌면 어떨까?
-* 어떤 수의 공약수는 루트값의 공약수와 같은 라는 얘기가 있으므로 이걸 힌트 삼아보자.
+* 유클리드 호제법을 사용하면 좀 더 성능이 좋아질 수 있다.
+
+### 유클리드 호제법 적용 
+```
+object ImageRatio {
+  def ratio(size: Tuple2[Long, Long]): Tuple2[Long, Long] = {
+    checkException(size)
+    val imageSize = swapByImageSize(size)
+    val gcdValue = this.gcd(imageSize._1, imageSize._2)
+    Tuple2( size._1 / gcdValue , size._2 / gcdValue )
+  }
+  
+  private def swapByImageSize(size: Tuple2[Long,Long]): Tuple2[Long,Long] = if ( size._1 < size._2 ) size.swap else size
+  
+  private def gcd(left: Long, right: Long) : Long = if ( right == 0L ) left else gcd(right, left % right) 
+
+  private def checkException(size: Tuple2[Long, Long]) = if (size._1 == 0 || size._2 == 0)
+    throw new IllegalArgumentException("height or width is zero")
+}
+```
+
+#### 느낀점 또는 개선점
+* 유클리드 호제법 적용으로 a,b 중 작은 값으로 
