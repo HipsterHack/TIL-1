@@ -59,7 +59,7 @@ import scala.collection.mutable.Map
 
 object DuplicatedNumbers {
   def findDuplicatedNumber( numbers: Array[Int]) : Option[Int] = {
-    var numberMap: Map[Int,Boolean] = Map()
+    val numberMap: Map[Int,Boolean] = Map()
     
     for ( num <- numbers){
       if (numberMap contains num ){
@@ -88,7 +88,7 @@ import scala.collection.mutable.Map
 
 object DuplicatedNumbers {
   def findDuplicatedNumber( numbers: Array[Int]) : Option[Int] = {
-    var numberMap: Map[Int,Boolean] = Map()
+    val numberMap: Map[Int,Boolean] = Map()
     numbers.foreach(num => 
       if (numberMap contains num ){
         return Some(num)  
