@@ -198,4 +198,14 @@ object ImageRatio {
 ```
 
 #### 느낀점 또는 개선점
-* 유클리드 호제법 적용으로 a,b 중 작은 값으로 
+* 유클리드 호제법 적용.  a,b 중 작은 값이 수행 시간을 결정한다.
+* 시간 개선할 수 있는 방법이 있을지 고민 해야한다
+* 재귀 호출이라 많이 수행하면 오버플로우가 발생할 수 있음.
+```
+while (right != 0){
+  remain = left % right
+  left = right
+  right = remain
+}
+```
+* [Range](http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Range) 를 이용하면 함수형으로 바꿀 수 있을 것 같다. 다시 한번 작성해보자.
