@@ -40,19 +40,19 @@ object Average {
 
 
 ## Array에서 중복값 구하기
-#### Question
+### Question
 * n+1 크기의 integer array를 가진다.
 * 1개의 중복을 가지고 있다
 * 배열은 정렬 되어 있지 않다
 * 예를 들어 [3,2,5,1,3,4] 의 중복은 3이다.
 * 리턴은 1개의 integer 값을 돌려준다
 
-#### Solution
+### Solution
 * Map을 써서 중복이 여부를 확인
 * O(N)의 시간 복잡도를 가짐
 * 공간 복잡도는 (Int byte + boolean byte + map 버킷 크기)  * N
 
-##### imperative Style
+#### imperative Style
 ```
 
 import scala.collection.mutable.Map
@@ -108,9 +108,72 @@ object DuplicatedNumbers {
 }
 ```
 
-
-#### 느낀점 또는 개선점 
+## 느낀점 또는 개선점 
 * 코드를 좀 더 간단하게 만들 수 있을까?
 * FoldLeft같은 걸 이용해서 성능을 개선할 수 있다(공간복잡도 문제 해결)
 * Map을 안쓰고 만들 수 있는 방법은 없을까?
+
+## Image Ratio 구하기
+### Question
+* 흔히 사용하는 Image ratio를 구한다. (16:9 , 5:4 등)
+* 이미지 width, height중 하나라도 0이 들어가면 Exception을 던진다.
 * 
+
+### Solution
+* 이미지 비율을 적당히 나눈다.
+* 더 이상 나눠지지 않는 값을 만들어야 하므로 최대 공약수를 구해야한다.
+* width, height 중에서 작은 값 만큼의 loop를 돌아서 값을 구한다
+* O(N)의 시간 복잡도를 가짐
+* 두개의 값을 묶으므로 Tuple을 사용해보자
+
+#### imperative Style
+
+* 문제 코드 
+```
+import scala.util.control._
+
+object ImageRatio {
+  def ratio(size: Tuple2[Long, Long]): Tuple2[Long, Long] = {
+    checkException(size)
+    val smallerValue: Long = size._1 min size._2
+    val biggerValue: Long = size._1 max size._2
+    var maxVal:Long = 1L
+
+    for (i <- 2L to smallerValue ) {
+      if (biggerValue % i == 0 && smallerValue % i == 0) {
+        maxVal = i
+      } 
+    }
+    Tuple2( size._1 / maxVal , size._2 / maxVal )
+  }
+
+  private def checkException(size: Tuple2[Long, Long]) = if (size._1 == 0 || size._2 == 0)
+    throw new IllegalArgumentException("height or width is zero")
+}
+```
+
+* 테스트 코드 
+```
+import org.scalatest.FunSuite
+import org.scalatest._
+
+class ImageRatioTest extends FunSuite {
+  test("should make exception in case of width or  height zero in image ratio function") {
+    intercept[IllegalArgumentException] {
+      val ratio = ImageRatio.ratio((0, 0))
+    }
+  }
+  test("should return correct result of ratio method.") {
+    assert(Tuple2(5, 1) == ImageRatio.ratio((100, 20)))
+    assert(Tuple2(16, 9) == ImageRatio.ratio((16, 9)))
+    assert(Tuple2(5, 4) == ImageRatio.ratio((5, 4)))
+    assert(Tuple2(5, 4) == ImageRatio.ratio((10, 8)))
+    assert(Tuple2(2, 3) == ImageRatio.ratio((2902, 4353)))
+  }
+}
+```
+
+## 느낀점 또는 개선점
+* for loop를 벗어나서 함수형 스타일로 옮길 수 있을까?
+* 소수가 아닌 이상 1부터 시작하면 값이 커질 수 있으므로 가장 큰 수에서 부터 돌면 어떨까?
+* 어떤 수의 공약수는 루트값의 공약수와 같은 라는 얘기가 있으므로 이걸 힌트 삼아보자.
