@@ -247,10 +247,58 @@ class SpeedMesure(s: Int) {
     else 0    
 }
 ```
-
 ### 개선점
 * FP로 바꾸기 참 어렵다.
 * 적당한 Collection API는 없다. 그러므로 메소드 자체에서 하나씩 처리해가면서 tail recursion으로 처리해야 FP형태로 만들 수 있다. 
 * 이건 책을 좀 찾아봐야겠다.
 
+## Functional Style(?)
+
+```
+import scala.collection.mutable.ArrayBuffer
+import scala.annotation.tailrec
+
+class SpeedMesure(s: Int) {
+  require(s > 0)
+  val intervalSecound = s
+  val secoundAHour = 3600
+
+  def measure(distances: Array[Double]) = {
+    require(distances.length > 1)
+    val speedList = ArrayBuffer[Double]()
+    
+    @tailrec
+    def loop(arrs:ArrayBuffer[Double], currentCursor:Iterator[Double], nextCursor:Iterator[Double]): Array[Double] = {      
+      if ( !currentCursor.hasNext || !nextCursor.hasNext ) {
+        arrs.toArray
+      }
+      else {
+        arrs.append(calculateSpeedPerHour(nextCursor.next() - currentCursor.next()))
+        loop(arrs, currentCursor, nextCursor)
+      }
+    }
+
+    val it = distances.iterator
+    val nextIter = distances.iterator
+    nextIter.next()
+    maxInArray(loop(speedList, it, nextIter)).toInt
+  }
+  
+  private def calculateSpeedPerHour(deltaDistance: Double): Double = (deltaDistance / intervalSecound) * secoundAHour
+  
+  private def maxInArray(values: Array[Double]) = if (values.length > 1)  values.max
+    else 0    
+}
+
+object SpeedMeasureTest extends App{
+  val x = Array[Double](0.0, 0.19, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25)
+  val s = 15
+  println(new SpeedMesure(s).measure(x))
+}
+```
+### 알게된 점
+* scala.annotation.tailrec 은 Tail Recursion 으로 컴파일러가 만들어준다
+* 코드에 최적화 불가능의 케이스가 있다면 오류를 발생한다.
+* iterator를 두 개 쓰고 있는데 다른 방법은 없을지 생각해 봐야겠다.
+* 인덱스로 처리할 수 있는건 아닌듯하다.
 
