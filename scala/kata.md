@@ -209,3 +209,48 @@ while (right != 0){
 }
 ```
 * [Range](http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Range) 를 이용하면 함수형으로 바꿀 수 있을 것 같다. 다시 한번 작성해보자.
+
+## GPS를 이용한 최고 속도 구하기
+* 존의 GPS는 s 초마다 처음 지점에서부터 이동한 거리를 기록한다
+* 구간 속도의 최대값을 integer로 구하라 
+* 측정값이 1보다 작으면 움직이지 않은 것이다.
+* 예제: 결과는 74
+```
+x = [0.0, 0.19, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25]
+result = 74
+```
+* 문제 URL : http://www.codewars.com/kata/speed-control
+
+### imperative Style
+
+```
+import scala.collection.mutable.ArrayBuffer
+
+class SpeedMesure(s: Int) {
+  require(s > 0)
+  val intervalSecound = s
+  val secoundAHour = 3600
+
+  def measure(distances: Array[Double]) = {
+    val speedList = ArrayBuffer[Double]()
+    for( i <- 0 until distances.length - 1 ){
+      val deltaDistance = distances(i + 1) - distances(i)
+      val speedPerHour = calculateSpeedPerHour(deltaDistance)
+      speedList += speedPerHour
+    }
+    val arrs = maxInArray(speedList.toArray)
+  }
+  
+  private def calculateSpeedPerHour(deltaDistance: Double): Double = (deltaDistance / intervalSecound) * secoundAHour
+  
+  private def maxInArray(values: Array[Double]) = if (values.length > 1)  values.max
+    else 0    
+}
+```
+
+### 개선점
+* FP로 바꾸기 참 어렵다.
+* 적당한 Collection API는 없다. 그러므로 메소드 자체에서 하나씩 처리해가면서 tail recursion으로 처리해야 FP형태로 만들 수 있다. 
+* 이건 책을 좀 찾아봐야겠다.
+
+
