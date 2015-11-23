@@ -72,8 +72,58 @@ request.OK(as.String)
 
 
 ## 데이터 타입 
-
+* Int
+* BigInt
+* Double
+* Float
+* String
 ( 추후 정리 예정)
+
+## 클래스
+```
+// 클래스 파라미터 n, d 
+class Rational(n :Int, d: Int){
+  // 여기서부터는 생성자로 들어간다.
+  // require는 클래스 파라미터의 오류를 체크한다.
+  require(d != 0)
+  private val g = gcd(n.abs, d.abs)
+  val numer = n / g
+  val denom = d / g
+
+  def this(n: Int) = this(n, 1)
+
+  def + (that: Rational): Rational =
+    new Rational( 
+           numer * that.denom + that.numer * denom,
+           denom * that.denom
+    )
+  
+  override def toString = numer + "/" + denom
+
+  private def gcd(a: Int, b: Int): Int = 
+    if (b == 0) a else gcd(b, a % b)
+}
+```
+
+* 클래스 파라미터(위 코드에서 n,d)는 생성자에서 사용한다 
+* def 가 없이 선언된 변수는 public로 접근이 가능하다.
+* requre() 는 false면 IllegalArgumentException을 발생한다.
+* 생성자를 추가하려고 할땐 this를 이용한다
+* 재귀 함수 호출을 지향한다. 다만 tail recursion 을 이용하면 스칼라 내부에서 최적화한다.
+* override할떈 override 키워드를 이용한다
+* ->, <- 는 한개의 리터럴로 인식한다.
+* x.add(y)는 x add y 로 표현할 수 있다
+* val는 할당이 불가능한거다. 내부 상태는 변할 수 있다. 대체로 장점을 가진다. 하지만 레퍼런스가 여러 개로 연결되어서 복사할게 많으면 멸망이다.
+
+### 메소드 오버로드
+
+* 오버로드는 자바의 오버로드와 비슷하다
+
+### 암시적 타입 변환
+* 2 + r 은 안되는 형태(Int.+(r)이기 때문)
+* implicit을 이용하여 메소드를 선언하면 변환을 할 수 있다.
+* 암시적 변환을 이용할땐 import scala.language.implicitConversions 를 해서 문제를 해결하는게 좋다.
+* 클라이언트가 간결하며 이해하기 쉬우면 좋지만 지나치면 나쁘다.
 
 ## case class
 
