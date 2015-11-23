@@ -210,7 +210,7 @@ while (right != 0){
 ```
 * [Range](http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Range) 를 이용하면 함수형으로 바꿀 수 있을 것 같다. 다시 한번 작성해보자.
 
-## GPS를 이용한 최고 속도 구하기
+## GPS 지점 기록을 이용한 최고 속도 구하기
 * 존의 GPS는 s 초마다 처음 지점에서부터 이동한 거리를 기록한다
 * 구간 속도의 최대값을 integer로 구하라 
 * 측정값이 1보다 작으면 움직이지 않은 것이다.
@@ -302,3 +302,67 @@ object SpeedMeasureTest extends App{
 * iterator를 두 개 쓰고 있는데 다른 방법은 없을지 생각해 봐야겠다.
 * 인덱스로 처리할 수 있는건 아닌듯하다.
 
+## Imperative Style + Functional Style(?)
+* 코드
+```
+import scala.collection.mutable.ArrayBuffer
+import scala.annotation.tailrec
+
+class Speed (s: Int) {
+  require(s > 0)
+  val intervalSecound = s
+  val secoundAHour = 3600
+
+  def measure(distances: Array[Double]) = {
+    require(distances.length > 1)
+   
+    val groups = for {
+      current <- 0 until distances.length - 1
+    } yield Tuple2[Double, Double](distances(current), distances(current + 1))
+                    
+    groups.foldLeft(0.0) {
+                      (maxValue:Double, el:Tuple2[Double,Double]) => 
+                        val speed = calculateSpeedPerHour(el._2 - el._1)
+                        if (speed >  maxValue) speed else maxValue
+                    }.toInt
+   }
+
+  private def calculateSpeedPerHour(deltaDistance: Double): Double = (deltaDistance / intervalSecound) * secoundAHour
+
+  private def maxInArray(values: Array[Double]) = if (values.length > 1) values.max
+    else 0   
+}
+```
+* 테스트 코드
+```
+import org.scalatest.FunSuite
+
+class SpeedTest extends FunSuite {
+  test("should measure GPS's speed") {
+    val x = Array[Double](0.0, 0.19, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25)
+    val s = 15
+    assert(74 == new Speed(s).measure(x))
+  }
+
+  test("should not measure the number of record to equals to 1") {
+    val x: Array[Double] = Array[Double](0.0)
+    val s: Int = 15
+    intercept[IllegalArgumentException] {
+      new Speed(s).measure(x)
+    }
+  }
+  
+   test("should not measure the number of record to equals to zero") {
+    val x: Array[Double] = Array[Double]()
+    val s: Int = 15
+    intercept[IllegalArgumentException] {
+      new Speed(s).measure(x)
+    }
+  } 
+}
+```
+
+### 알게된점
+* 리스트 결과값을 return 해줄 때는 recursion 으로 적절하게 만들기 어렵다. (보통은 파라미터로 결과값을 들고 다니면서 처리하는 경우가 많았다)
+* 내가 함수형 사고에 익숙하지 않다.
+* imperative로 개발하다보니 for 루프를 버리기 어렵다.
