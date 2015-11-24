@@ -305,7 +305,8 @@ object Test{
 ```
 
 ### 익명 함수 및 클로저
-
+* 외부의 변수를 바인딩 시킨 경우 정확하게 클로저라 할 수 있다.
+* 외부 변수를 가져와 포획하여 바인딩 하면서 closing을 한다
 
 ```
  var decrease = (x: Int, min: Int) => x - min
@@ -321,6 +322,42 @@ object Test{
 
  decrease(6) // 5
 ```
+### Tail recursive
+* 한 메소드 내에서 같은 메소드 호출시만 Tail Recursive 가능.
+* 래핑 된거나 여러개의 재귀호출이면 불가능함
+* JVM이 지원하는게 아님. 스칼라 언어에서 제공하는 최적화
+* 최적화 코드는 같은 메소드 스택을 사용한다. 그래서 재귀호출이 안되는것처럼 보임
+
+### curry method
+* 학자이름에서 따왔다
+* 두 개 이상의 함수를 하나의 함수처럼 호출 하는 경우를 커리라고 부른다.
+```
+def curriedSum (x: Int)(y: Int) = x + y
+```
+* 여기서 curriedSum(1)로 호출하면 파라미터 한개를 바인딩하고 함수 값을 return 한다.
+
+#### 일반함수에서 커리 함수 사용으로 예제
+* 파일 내용을 PrintWriter로 화면에 뿌려줄때의 메소드
+```
+def withPrintWriter(file :File, op: PrintWriter => Unit){
+// 중략
+}
+```
+* 커리 함수로 변환하자. 좀더 쓰기 편해진다.
+```
+def withPrintWriter(file :File) (op: PrintWriter => Unit){
+// 중략
+}
+
+withPrintWriter(file) {
+  writer => writer.println("file.name")
+}
+```
+##### 주의점
+* 위에서 {}는  인자가 하나일때 사용가능하다.
+* 두개이면? 에러. 클라이언트 프로그래머에게 함수 리터럴 사용을 권장하기 위함.
+
+
 
 
 ### call by name
@@ -594,9 +631,6 @@ helloInfo2.productIterator.foreach { i => println("value = " + i)}
 
 [http://www.tutorialspoint.com/scala/scala_maps.htm](http://www.tutorialspoint.com/scala/scala_maps.htm)
 
-
-
-
 ### Set
 
 * 중복 없는 리스트다. 
@@ -705,6 +739,40 @@ sbt eclipse
 ### 주의사항 
 sbt, scala는 버전이 맞지 않으면 정상 동작 하지 않는다.
 가능하면 최신 버전으로 업데이트 하자.
+
+## 예외처리
+
+* try-catch 절을 사용한다.
+
+```
+try{
+ new URL(path)
+} catch {
+  case e: MalformedURLException => new URL("http://comic.naver.com")
+}finally{
+}
+```
+* finally엔 리턴을 명시하지 않으면 try, catch절에 값을 덮어씌운다.
+* 자바와는 다르다 자바와는!
+
+## match 
+
+* match는 switch - case 와 유사하다
+* 값을 기준으로 동작을 바꾸기 위해 사용한다.
+* 그리고 값을 조건에 따라 다르게 할당할 때도 사용한다.
+```
+firstArg match {
+ case "salt" => println("pepper")
+ case _ => println("what?")
+}
+
+val friend = firstArg match {
+ case "salt" => println("pepper")
+ case _ => println("what?")
+}
+
+println(friend)
+```
 
 ## 공부하기 좋은 자료들
 * [Scala school](https://twitter.github.io/scala_school/ko/basics.html)
