@@ -366,3 +366,93 @@ class SpeedTest extends FunSuite {
 * 리스트 결과값을 return 해줄 때는 recursion 으로 적절하게 만들기 어렵다. (보통은 파라미터로 결과값을 들고 다니면서 처리하는 경우가 많았다)
 * 내가 함수형 사고에 익숙하지 않다.
 * imperative로 개발하다보니 for 루프를 버리기 어렵다.
+
+
+## LinkedList 
+* 기본적인 링크드리스트 카타 .
+* push 메소드와 length 메소드를 만들어라
+* 언어를 확장 시켜서 ->를 연산자로 링크드 리스트를 만들어라.
+* 아래 예제를 참고
+
+```
+var chained = null
+chained = push(chained, 3)
+chained = push(chained, 2)
+chained = push(chained, 1)
+push(chained, 8) === 8 -> 1 -> 2 -> 3 -> null
+```
+
+### Answer 
+* 위의 요구조건대로라면 암묵적 타입 변환이 필요하다
+* 아직 내가 잘 쓰지 못하므로 일단 배제.
+* Node Class
+```
+package kata.linkedlist
+
+class Node[T] (data:T, nextNode: Node[T] = null) {
+  val value = data
+  var nextValue:Option[Node[T]] = if ( nextNode != null) Option[Node[T]](nextNode) else None;
+  
+  def hasNext():Boolean = nextValue != None
+  def next():Node[T] = nextValue.get
+}
+```
+* LinkedList Object 일단 동작하고 분리시킴
+```
+package kata.linkedlist
+
+import scala.annotation.tailrec
+
+object LinkedList {
+  def push[T](node:Node[T], value:T) : Node[T] = new Node[T](value, node)
+  
+  def length[T](node:Node[T]) : Int = count(node ,0)
+  
+  def printAll[T](root: Node[T]) = {
+    printNode(root)
+  }
+  
+  @tailrec
+  def count[T](node: Node[T], acc : Int) :Int = 
+    if (node == null) 0 else if (!node.hasNext()) acc + 1 else count[T](node.next , acc + 1)
+  
+
+  @tailrec
+  def printNode[T](node: Node[T]) : Unit = {
+    print(node.value)
+    print("-> ")
+    if (!node.hasNext()) 
+      print("null")
+    else 
+      printNode[T](node.next)
+  }
+}
+```
+* Push Test case (scala test 를 안깔아서 App으로 대신하고 프린트로 눈으로 테스트 케이스 만듬.
+```
+package kata.linkedlist
+
+object LinkedListPushTest extends App{
+  var chained = LinkedList.push[Int](null, 3)
+  chained = LinkedList.push[Int](chained, 2)
+  chained = LinkedList.push[Int](chained, 1)
+  LinkedList.printAll(LinkedList.push[Int](chained, 8))
+}
+```
+* Length Test case
+```
+package kata.linkedlist
+
+object LinkedListLengthTest extends App {
+  println(LinkedList.length(null))
+  var chained = LinkedList.push[Int](null, 3)
+  chained = LinkedList.push[Int](chained, 2)
+  chained = LinkedList.push[Int](chained, 1)
+  println(LinkedList.length(chained))
+}
+```
+
+#### 개선점
+* LinkedList 자체에 앞으로 뒤에 달리는 것이 몇개 더 있다고 알려주면 O(1)이 걸릴듯.
+* 다만 입력시 O(N)이 되겠다. 
+* 이보단 링크드리스트를 참조해서 감싸는 클래스를 만드는 것이 좀 더 간단함.(대신 메모리를 더 차지하겠지)
