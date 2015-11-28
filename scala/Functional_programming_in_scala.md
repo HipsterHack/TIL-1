@@ -118,6 +118,41 @@ object Female extends Gender
  // 즉 위 값은 1이다.
 ```
 
+### 3.3 문제 풀이 ###
+#### 문제 ####
+* dropWhile을 구현하라.
+* 첫 요소부터 시작한다
+* f가 true 일때까지 요소를 지우고 돌려준다
+#### 풀이 ####
+```
+package fpinscala.datastructures
+
+sealed trait List[+A]
+case object Nil extends List[Nothing]
+case class Cons[+A](head: A, tail: List[A]) extends List[A]
+
+object List {
+  def apply[A](as: A*): List[A] =
+    if (as.isEmpty) Nil
+    else Cons(as.head, apply(as.tail: _*))
+
+  def tail[A](l: List[A]): List[A] = l match {
+    case Nil        => Nil
+    case Cons(h, t) => t
+  }
+
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+    case Nil        => Nil
+    case Cons(h, t) => if (f(h)) dropWhile(tail(l), f) else l
+  }
+}
+
+object ListTest extends App {
+  println(List.dropWhile[Int](List(1, 1, 3, 4), _ % 2 != 0))
+  println(List.dropWhile[Int](List(1, 2, 3, 4), _ % 2 != 0))
+}
+```
+
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
