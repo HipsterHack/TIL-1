@@ -120,9 +120,9 @@ object Female extends Gender
 
 ### 3.3 문제 풀이 ###
 #### 문제 ####
-* dropWhile을 구현하라.
+* drop, dropWhile을 구현하라.
 * 첫 요소부터 시작한다
-* f가 true 일때까지 요소를 지우고 돌려준다
+* f가 true 일때까지 요소를 지우고 돌려준다( dropWhile만)
 #### 풀이 ####
 ```
 package fpinscala.datastructures
@@ -140,6 +140,13 @@ object List {
     case Nil        => Nil
     case Cons(h, t) => t
   }
+
+  def drop[A](l: List[A], n: Int): List[A] = {
+    def go(next: List[A], cnt: Int): List[A] = 
+      if (cnt == n || next == Nil) next
+      else go(tail(next), cnt + 1)    
+    go(l, 0)
+  }  
 
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
     case Nil        => Nil
