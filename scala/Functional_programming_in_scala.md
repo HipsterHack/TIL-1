@@ -118,11 +118,11 @@ object Female extends Gender
  // 즉 위 값은 1이다.
 ```
 
-### 3.4,3.5 문제 풀이 ###
+### 3.3 문제 풀이 ###
 #### 문제 ####
-* drop, dropWhile을 구현하라.
+* dropWhile을 구현하라.
 * 첫 요소부터 시작한다
-* f가 true 일때까지 요소를 지우고 돌려준다. (dropWhile 만)
+* f가 true 일때까지 요소를 지우고 돌려준다
 #### 풀이 ####
 ```
 package fpinscala.datastructures
@@ -140,12 +140,6 @@ object List {
     case Nil        => Nil
     case Cons(h, t) => t
   }
-  def drop[A](l: List[A], n: Int): List[A] = {
-    def go(next: List[A], cnt: Int): List[A] = 
-      if (cnt == n || next == Nil) next
-      else go(tail(next), cnt + 1)    
-    go(l, 0)
-  }  
 
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
     case Nil        => Nil
@@ -158,6 +152,21 @@ object ListTest extends App {
   println(List.dropWhile[Int](List(1, 2, 3, 4), _ % 2 != 0))
 }
 ```
+
+### 3.6 문제풀이 
+#### 문제
+* 맨 뒤 요소를 빼는 init을 구현한다. 
+### 해결책
+* O(N)으로 밖에 구현이 안된다. 
+* 링크드 리스트고 탐색하는데 걸리는시간이 O(N)이기 때문이다. 
+```
+  def init[A](l: List[A]): List[A] = l match {
+    case Nil => Nil
+    case Cons(_,Nil) => Nil
+    case Cons(h, t) => Cons(h, init(t))
+  }
+```
+
 
 
 ## 참고 자료 
