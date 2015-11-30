@@ -174,6 +174,56 @@ object ListTest extends App {
   }
 ```
 
+### 3.7
+#### 문제
+* fold로 구현한게 0.0을 만났을때 재귀를 멈추는가?
+#### 해결책
+* 구현하지 않았다. 
+* 0을 만났을 때 fold를 중단하는 방식을 찾으면 된다.
+
+### 3.9
+#### 문제
+* length를 구현하라
+#### 해결책
+```
+def length[A](ns: List[A]) =
+    foldRight[A, Int](ns, 0)((x: A, y: Int) => y + 1)
+
+```
+### 3.10
+#### 문제
+* foldLeft를 구현하라
+* stack safe하도록 구현해라
+#### 해결책
+* Tail Recursion과 가산 변수를 메소드에 추가하자
+* 이러면 가산 변수에 결과값을 넣으면 tail recursion을 한다.
+```
+  def foldLeft2[A, B](as: List[A], z: B)(f: (B, A) => B): B = {
+    @tailrec
+    def fold[A, B](l: List[A], b: B, fx: (B, A) => B, acc: B): B = l match {
+      case Nil          => b
+      case Cons(h, Nil) => fx(acc, h)
+      case Cons(h, t)   => fold(t, b, fx, fx(acc, h))
+    }
+    fold(as, z, f, z)
+  }
+```
+
+### 3.11
+#### 문제
+* sum, product, length를 foldLeft로 구현해라
+#### 해결책
+```
+  def sumByFoldLeft(ns: List[Int]): Int =
+    foldLeft2(ns, 0)(_ + _)
+
+  def productByFoldLeft(ns: List[Double]): Double =
+    foldLeft2(ns, 1.0)(_ * _)
+    
+  def lengthByFoldLeft[A](ns: List[A]): Int = 
+    foldLeft2[A, Int](ns, 0)((x: Int, y: A) => x + 1)
+    
+```
 
 
 ## 참고 자료 
