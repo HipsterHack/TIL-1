@@ -229,7 +229,10 @@ def length[A](ns: List[A]) =
 #### 문제
 * reverse 를 구현해라. 
 * 단 fold메소드를 사용해서 구현할 것
+
+
 #### 해결책 
+
 * 빈 리스트 (apply로 문제 해결)
 ```
   def reverse[A](as: List[A]): List[A] = 
