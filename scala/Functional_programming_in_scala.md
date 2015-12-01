@@ -225,6 +225,18 @@ def length[A](ns: List[A]) =
     
 ```
 
+### 3.12 
+#### 문제
+* reverse 를 구현해라. 
+* 단 fold메소드를 사용해서 구현할 것
+#### 해결책 
+* 빈 리스트 (apply로 문제 해결)
+```
+  def reverse[A](as: List[A]): List[A] = 
+    foldLeft(as, List[A]())((acc,el) => Cons(el, acc))
+```
+
+
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
