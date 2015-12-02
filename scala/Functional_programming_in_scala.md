@@ -194,6 +194,7 @@ def length[A](ns: List[A]) =
 #### 문제
 * foldLeft를 구현하라
 * stack safe하도록 구현해라
+
 #### 해결책
 * Tail Recursion과 가산 변수를 메소드에 추가하자
 * 이러면 가산 변수에 결과값을 넣으면 tail recursion을 한다.
@@ -212,6 +213,7 @@ def length[A](ns: List[A]) =
 ### 3.11
 #### 문제
 * sum, product, length를 foldLeft로 구현해라
+
 #### 해결책
 ```
   def sumByFoldLeft(ns: List[Int]): Int =
@@ -230,7 +232,6 @@ def length[A](ns: List[A]) =
 * reverse 를 구현해라. 
 * 단 fold메소드를 사용해서 구현할 것
 
-
 #### 해결책 
 
 * 빈 리스트 (apply로 문제 해결)
@@ -239,7 +240,64 @@ def length[A](ns: List[A]) =
     foldLeft(as, List[A]())((acc,el) => Cons(el, acc))
 ```
 
+### 3.13
+#### 문제
+* FoldLeft를 foldRight로 구현해라
+ 
+#### 해결책
+* reverse로 뒤집는다.
+```
+  def foldRight2[A, B](as: List[A], z: B)(f: (A, B) => B): B =
+    foldLeft(reverse(as), z)((b, a) => f(a, b))
+```
+### 3.16
+#### 문제
+* 정수 List에서 1을 더해서 목록을 변환하는 함수를 작성해라
+* 단 새 List를 돌려주어야 한다.
+#### 해결책
+```
+  def plusOne(l: List[Int]): List[Int] =
+    foldRight(l, List[Int]())((a, b) => Cons(a + 1, b))
+```
 
+### 3.17
+#### 문제
+* List[Double]을 String으로 변환하는 함수를 작성해라 
+
+#### 해결책
+* foldRight를 활용하여 문제를 풀었다.
+```
+  def convertDoubleToString(l: List[Double]): List[String] =
+    foldRight(l, List[String]())((a, b) => Cons(a.toString(), b))
+```
+
+### 3.18
+#### 문제
+* map을 구현해라
+```
+def map[A, B](l: List[A])(f: A => B): List[B]
+```
+#### 해결책
+```
+import scala.collection.mutable.ListBuffer
+  def map[A, B](l: List[A])(f: A => B): List[B] = l match {
+    case Nil        => Nil
+    case Cons(h, t) => Cons(f(h), map(t)(f))
+  }
+  
+  def map2[A, B](l: List[A])(f: A => B): List[B] = {
+    val buffer = new ListBuffer[B]()
+    def go(l: List[A]): Unit = l match {
+      case Nil => ()
+      case Cons(h, t) => {
+          buffer += f(h)
+          go(t)
+      }
+    }
+    go(l)
+    List(buffer.toList: _*)    
+  }
+```
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
