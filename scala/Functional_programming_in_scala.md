@@ -298,6 +298,63 @@ import scala.collection.mutable.ListBuffer
     List(buffer.toList: _*)    
   }
 ```
+### 3.19
+#### 문제
+* filter를 구현해라
+```
+def filter[A](l: List[A])(f: A => Boolean): List[A]
+```
+#### 해결책
+* ListBuffer 또는 FoldRight를 이용해서 구현한다.
+```
+import scala.collection.mutable.ListBuffer
+  def filter[A](l: List[A])(f: A => Boolean): List[A] = {
+    val buffer = new ListBuffer[A]()
+    def go(as: List[A]): Unit = as match {
+      case Nil => ()
+      case Cons(h, t) => {
+        if (!f(h)) buffer += h
+        go(t)
+      }
+    }
+    go(l)
+    List(buffer.toList: _*)
+  }
+
+  def filterViaFoldRight[A](l: List[A])(f: A => Boolean): List[A] =
+    foldRight(l, Nil: List[A])((h, t) => if (f(h)) Cons(h, t) else t)
+```
+### 3.20
+#### 문제
+* flatMap을 구현해라
+```
+ List.flatMap(List(1,2,3))(i => List(i, i))
+```
+
+* 아래는 함수 시그니쳐이다. 
+```
+  def flatMap[A, B](l: List[A])(f: A => List[B]): List[B]
+```
+#### 해결책
+* 리스트와 리스트를 붙여주는 append 를 이용한다
+```
+  def flatMap[A, B](l: List[A])(f: A => List[B]): List[B] = l match {
+    case Nil        => Nil
+    case Cons(h, t) => append(f(h), flatMap(t)(f))
+  }
+```
+### 3.21
+#### 문제
+* filter를 이용해서 flatMap을 구현해라
+```
+def filterViaFlatMap[A](l: List[A])(f: A => Boolean): List[A]
+```
+#### 해결책
+```
+  def filterViaFlatMap[A](l: List[A])(f: A => Boolean): List[A] =
+    flatMap(l)(v => if (f(v)) Nil else List(v))  
+```
+
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
