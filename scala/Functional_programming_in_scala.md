@@ -356,6 +356,38 @@ def filterViaFlatMap[A](l: List[A])(f: A => Boolean): List[A]
 ```
 
 
+### 3.22
+#### 문제
+* 두 리스트를 더하는 메소드를 만들어라
+* List(1,2,3) 와 List(4,5,6) 을 더하면  List(5,7,9)라는 결과가 나오는 메소드를 만들어라 
+
+#### 해결책
+* 패턴 매치를 두 개 인자를 대상으로 사용할 수 있다.
+```
+  def plusLists(l: List[Int], r: List[Int]): List[Int] = (l, r) match {
+    case (Nil, Nil)                   => Nil
+    case (Cons(h, t), Nil)            => Cons(h, t)
+    case (Nil, Cons(h, t))            => Cons(h, t)
+    case (Cons(lh, lt), Cons(rh, rt)) => Cons(lh + rh, plusLists(lt, rt))
+  }
+```
+
+### 3.23
+
+#### 문제
+* 3.22를 일반화 시켜서 zipWith 메소드를 만들어라 
+
+#### 해결책
+* 커링을 이용해 연산용 메소드를 받는다.
+```
+  def zipWith[A, B, C](l: List[A], r: List[B])(f: (A, B) => C): List[C] = (l, r) match {
+    case (Nil, Nil)                   => Nil
+    case (Cons(h, t), Nil)            => Nil
+    case (Nil, Cons(h, t))            => Nil
+    case (Cons(lh, lt), Cons(rh, rt)) => Cons(f(lh, rh), zipWith(lt, rt)(f))
+  }
+```
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
