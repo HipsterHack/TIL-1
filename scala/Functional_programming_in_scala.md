@@ -417,6 +417,30 @@ def filterViaFlatMap[A](l: List[A])(f: A => Boolean): List[A]
     go(sup)
   }
 ```
+* 개선 풀이
+
+```
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+    @tailrec // acc 제거 
+    def loop(target: List[A], subList: List[A]): Boolean = (target, subList) match {
+      case (_, Nil)                                 => true
+      case (Cons(lh, lt), Cons(rh, rt)) if lh == rh => loop(lt, rt)
+      case _                                        => false
+    }
+
+    @tailrec
+    def go(l: List[A]): Boolean = l match {
+      // subList와 리스트가 같은 값으면 true
+      case Nil               => sub == l
+      // l이 어떤 값이 오든 현재의 l이 sub로 시작한다면 같은 값 
+      case _ if loop(l, sub) => true
+      // 다른 값이라 넘어감
+      case Cons(_, t)        => go(t)
+    }
+    go(sup)
+  }
+```
+
 ### 모범답안
 ```
 @annotation.tailrec
