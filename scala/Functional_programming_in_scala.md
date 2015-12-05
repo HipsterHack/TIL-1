@@ -387,6 +387,51 @@ def filterViaFlatMap[A](l: List[A])(f: A => Boolean): List[A]
     case (Cons(lh, lt), Cons(rh, rt)) => Cons(f(lh, rh), zipWith(lt, rt)(f))
   }
 ```
+### 3.24
+
+#### 문제
+* List가 또다른 List를 부분 순차열로 담고 있는지 체크하는 메소드를 구현한다
+* 예를 들어 List(1,2,3,4)는 List(4), List(1,2) 등이 부분 순차열이다.
+
+#### 해결책
+* 한 번에 모두 풀려고 하지 말자
+* sup 파라미터의 현재 위치에서 주어진 부분 순차열(sub)에 포함되는가의 메소드(loop)
+* go는 sup을 뒤로 조금씩 이동하면서 loop가 true를 돌려주는지를  체크한다. 
+* 개선점이 있다면 loop나 go는 내부 함수로 두지 않아도 된다.
+* case () if를 이용해서 특정 조건일때만 case를 수행되게 하고 나머지는 false처리 할 수 있다.
+* 가산 변수 acc를 사용하지 않아도 된다.
+```
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+    @tailrec
+    def loop(target: List[A], subList: List[A], acc: Boolean): Boolean = (target, subList) match {
+      case (_, Nil)                     => acc
+      case (Cons(lh, lt), Cons(rh, rt)) => if (acc) loop(lt, rt, lh == rh && acc) else acc
+      case _                            => false
+    }
+
+    @tailrec
+    def go(l: List[A]): Boolean = l match {
+      case Nil        => false
+      case Cons(_, t) => if (loop(l, sub, true)) true else go(t)
+    }
+    go(sup)
+  }
+```
+### 모범답안
+```
+@annotation.tailrec
+def startsWith[A](l: List[A], prefix: List[A]): Boolean = (l,prefix) match {
+  case (_,Nil) => true
+  case (Cons(h,t),Cons(h2,t2)) if h == h2 => startsWith(t, t2)
+  case _ => false
+}
+@annotation.tailrec
+def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = sup match {
+  case Nil => sub == Nil
+  case _ if startsWith(sup, sub) => true
+  case Cons(_,t) => hasSubsequence(t, sub)
+}
+```
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
