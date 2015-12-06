@@ -456,6 +456,39 @@ def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = sup match {
   case Cons(_,t) => hasSubsequence(t, sub)
 }
 ```
+### 3.25
+
+#### 문제
+* 트리의 전체 개수를 구해라
+#### 풀이 
+```
+  def size[A](tree: Tree[A]): Int = tree match {
+    case Leaf(v)      => 1
+    case Branch(l, r) => 1 + size(l) + size(r)
+  }
+```
+
+### 3.26
+#### 문제
+* 가장 큰 Leaf의 value를 구해라
+#### 풀이
+```
+  def maximum(tree: Tree[Int]): Int = tree match {
+    case Leaf(v)      => v
+    case Branch(l, r) => maximum(l) max maximum(r)
+  }
+```
+
+### 3.27
+#### 문제
+* tree의 depth를 구해라
+#### 풀이
+```
+  def depth[A](tree: Tree[A]): Int = tree match {
+    case Leaf(_)      => 0
+    case Branch(l, r) => 1 + depth(l).max(depth(r))
+  }
+```
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
