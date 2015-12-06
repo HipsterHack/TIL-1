@@ -117,6 +117,17 @@ object Female extends Gender
  // 위와 상등은            Cons(1, Cons(2, Conms(3, Nil))) 이다
  // 즉 위 값은 1이다.
 ```
+### 대수적 자료 형식 ###
+* 일종의 복합 타입이다.(Tuple이나 record가 예)
+* 1개 이상의 data 생성자만 있다. 데이터 생성자의 파라미터는 필드라 부른다.
+* 이런 data 형식을 data 생성자의 sum합 또는 합집합union이라 부른다.
+* 각 data 생성자는 생성자가 가진 인수의 곱product 이라 부른다.
+
+
+### 참고 ###
+
+* [대수적자료형식 위키피디아](https://en.wikipedia.org/wiki/Algebraic_data_type)
+
 
 ### 3.3 문제 풀이 ###
 #### 문제 ####
