@@ -578,9 +578,24 @@ trait Option[+A] {
 ##### 문제 
 
 * Option의 기본 함수를 구현하고 어떻게 쓰일지 상상해보라
+* map, getOrElse는 패턴 부합을 쓰고 나머지는 쓰지 말아라
 
 ##### 풀이
-
+```
+  def map[B](f: A => B): Option[B] = this match {
+    case Some(a) => Some[B](f(a))
+    case _ => None
+  }
+  def flatMap[B](f: A => Option[B]): Option[B] = map(f) getOrElse None
+  
+  def getOrElse[B >: A](default: => B): B = this match {
+    case Some(a) => a
+    case _ => default
+  }
+  def orElse[B >: A](ob: => Option[B]): Option[B] = this map (Some(_)) getOrElse ob
+  
+  def filter(f: A => Boolean): Option[A] = flatMap(a => if(f(a)) Some(a) else None) 
+```
 
 
 
