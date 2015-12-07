@@ -500,6 +500,89 @@ def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = sup match {
     case Branch(l, r) => 1 + depth(l).max(depth(r))
   }
 ```
+## 4 장 예외를 이용하지 않는 오류처리
+### 예외의 단점
+```
+def failingFn(i: Int): Int = { 
+  val y: Int = throw new Exception("fail!")
+  try {
+    val x = 42 + 6
+    x + y
+  } catch { case e: Exception => 43 }
+}
+```
+* 예외는 참조 투명성을 위반한다
+- 참조 투명한 표현식은 지역적으로 추론이 가능함. 즉, 이 코드만 보고도 뭔 내용인지 안다라는 뜻.
+- 예외를 사용하면 코드리딩을 할때 호출하는 곳으로 이동해야 어떤 처리를 하는지 알수 있다.
+* 문맥 의존성을 도입한다.
+* 형식에 안전하지 않다. Int => Int 인자와 리턴타입만 보곤 예외를 던진다는걸 모른다.
+
+### 장점
+* 중앙집중화
+* 오류 처리 논리의 통합
+
+### checked Exception
+* 결과를 미리 체크해서 예외 결과를 리턴 값으로 주는 경우
+* 고차 함수에서는 통하지 않는다!(인자로 받는 함수안에서 뭔 Exception을 던질지 모른다.)
+
+### 예외의 대안
+
+#### 가짜값 돌려주기
+* 0/0 같은 경우는 0을 돌려준다
+* 그러나 이 책에선 이런 접근 방식을 피한다
+* 오류가 아무런 알림없이 전파된다. 컴파일러가 경고를 해주지 않는다.
+* 호출자쪽에서 진짜 결과를 받았는지 점검하는 비스무리한 코드가 늘어난다.
+* 다형적 코드에는 적용할 수 없다
+* 호출자에 특별한 방침이나 호출 규약이 생긴다.
+
+#### 처리할 수 없는 경우의 default값을 돌려주기
+* 완전한 함수가 된다
+* 하지만 이 함수의 처리 방식을 호출자가 알고 있어야 한다.
+
+#### 새로운 자료형식의 도입 Option
+* 반환 형식을 명시적으로 표현하는 것.
+
+```
+sealed trait Option[+A]
+case class Some[+A] extends Option[A]
+case object None extends Option[Nothing]
+
+def mean(xs:Seq[Double]): Option[Double] = if (xs.isEmpty) None else Some(xs.sum / xs.length)
+```
+
+* 위 예제는 모든 값에 하나의 리턴 타입을 가진다.
+* 유효하지 않는 출력은 None을 돌려주기 때문
+
+##### Option 사용 패턴
+* Map에서 주어진 키를 찾는 함수
+* List와 iterable 형식에 headOption, lastOption 은 순차열이 비지 않는 경우 첫 요소나 마지막 요소를 가진 Option을 돌려줌
+
+##### Option의 기본 함수 
+```
+trait Option[+A] {
+  def map[B](f: A => B): Option[B]
+  def flatMap[B](f: A => Option[B]): Option[B]
+  def getOrElse[B >: A](default: => B): B
+  def orElse[B >: A](ob: => Option[B]): Option[B]
+  def filter(f: A => Boolean): Option[A]
+}
+```
+* B >: A B가 A타입이거나 A의 상위 타입이어야 한다는 의미
+* default: => B 인수가 B 지만 평가되기전까지는 사용하지 않는다.
+
+
+### 문제 풀이 
+
+#### 4.1
+
+##### 문제 
+
+* Option의 기본 함수를 구현하고 어떻게 쓰일지 상상해보라
+
+##### 풀이
+
+
+
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
