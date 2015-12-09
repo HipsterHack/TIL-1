@@ -597,6 +597,23 @@ trait Option[+A] {
   def filter(f: A => Boolean): Option[A] = flatMap(a => if(f(a)) Some(a) else None) 
 ```
 
+#### 4.2
+##### 문제 
+* Option의 flatMap과 mean을 이용해서 variance(분산)을 구해라
+* Seq에 대해 math.pow(x - m, 2)의 평균이 분산이다.
+* 아래는 시그니쳐
+```
+def variance(xs: Seq[Double]): Option[Double] 
+```
+##### 풀이
+
+```
+object Math {
+  def mean(xs: Seq[Double]): Option[Double] = if (xs.isEmpty) None else Some(xs.sum / xs.length)
+  // 4.2 
+  def variance(xs: Seq[Double]): Option[Double] = mean(xs).flatMap { m => mean(xs.map(x => math.pow(x - m, 2))) }
+}
+```
 
 
 ## 참고 자료 
