@@ -643,8 +643,56 @@ getOrElse(throw new Exception ("Failed to calculate"))
 * 예외 처리를 뒤로 미루는 매커니즘.
 
 ### 예외의 승급과 감싸기
+#### 승급
+* 보통 메소드를 파라미터와 결과값을 Option이 감싸도록 승급(lift)가능하다
+```
+def lift[A,B](f: A => B): Option[A] => Option[B] = _ map f
+```
+
+예를 들면
+
+```
+val absWrappedOption: Option[Double] => Option[Double] = lift(math.abs)
+```
+예외가 발생할때, None으로 돌려준다. 즉 예외처리를 따로 하지 않아도 된다.
+
+#### 감싸기 
+* Try 함수를 구현해서 사용하자.
+```
+def Try[A](a: => A): Option[A] = try Some(a) catch { case e: Exception => None } 
+```
+* 게으른 파라미터: => A 로 표현함. 평가 시점에만 예외를 발생시키기 위해 이런 처리를 하였음.
+* 예
+```
+// Try(age.toInt) 로 표현 가능. 파라미터 1개를 받는 함수는 대괄호로 ()를 대신 가능함
+val optAge: Option[Int] = Try { age.toInt }  
+```
 
 
+### 4.3 문제 풀이 
+#### 문제
+* 두 Option값을 이항함수를 이용해서 결합하는 함수 map2를 만들어라. 
+* lift나 Try를 사용할 필욘 없다.
+```
+def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C]
+```
+#### 풀이
+```
+object Option {
+  def Try[A](a: => A): Option[A] = try Some(a) catch { case e: Exception => None }
+  // 4.3
+  def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = a.flatMap { x => b.map { y => f(x, y) } }
+}
+```
+* 테스트
+```
+  test("should return results of map2") {
+    println(Option.map2(Some(5), Some(10)) { (a: Int, b: Int) => a + b })
+    println(Option.map2(None, Some(10)) { (a: Int, b: Int) => a + b })
+    println(Option.map2(None, None) { (a: Int, b: Int) => a + b })
+    println(Option.map2(Some(5), None) { (a: Int, b: Int) => a + b })
+  }
+```
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
