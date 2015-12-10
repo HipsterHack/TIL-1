@@ -614,6 +614,36 @@ object Math {
   def variance(xs: Seq[Double]): Option[Double] = mean(xs).flatMap { m => mean(xs.map(x => math.pow(x - m, 2))) }
 }
 ```
+### Option의 기본적인 함수 용례
+
+#### map 
+*  option 안에 결과가 있다면 변환하는데 사용. 오류가 없다는 가정하에 계산할 수 있다.
+* 술어함수가 실패하면 None을 준다. 
+
+#### flatMap 
+*  여러 단계의 계산을 진행할때 유용하다. 중간 단계가 실패하면 계산 과정을 모두를 취소한다.
+* 술어함수가 실패하면 None을 준다
+
+#### filter
+* filter 는 주어진 술어 함수가 false 일때 요소를 제거한다.
+
+그래서 
+```
+val dept: String = lookupByName("json").map(_.dept).filter(_ != "Accounting").getOrElse("Default Dept")
+```
+위에 처럼 일반 imperative language 에선 상상도 할 수 없는 일을 할 수 있다.
+
+#### getOrElse
+값을 구할 수 없을 때  아래 idiom을 사용한다
+```
+getOrElse(throw new Exception ("Failed to calculate")) 
+```
+단 예외를 잡을 수 없는 상황에서만 사용한다
+
+* 예외 처리를 뒤로 미루는 매커니즘.
+
+### 예외의 승급과 감싸기
+
 
 
 ## 참고 자료 
