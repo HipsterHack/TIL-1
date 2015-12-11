@@ -694,6 +694,28 @@ object Option {
   }
 ```
 
+### 4.4 문제풀이
+Option의 목록을 받고 그 목록의 Some값을 담은 Option을 돌려주는 함수를 만들어라
+```
+def sequence[A](a: List[Option[A]]): Option[List[A]]
+```
+
+#### 풀이 
+* List 의 문제라 match를 도입했다. 
+* Option에서None처리를 위해선 flatMap 호출해야함.
+```
+  // 4.4 it's hard. 
+  def sequence[A](a: List[Option[A]]): Option[List[A]] = a match {
+    case Nil => Some(Nil)
+    case h :: t => h.flatMap { x => sequence(t).map( x :: _ ) }
+  }
+
+```
+
+### for-comprehension
+
+
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
