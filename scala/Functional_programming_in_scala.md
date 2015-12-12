@@ -761,6 +761,95 @@ for 중괄호 안에 bindings(aa <- a)가 있고 yield 다음엔 <- 묶음 좌�
 flatMap으로 호출을 전개하고 마지막 묶음과 yield는 map으로 호출로 변환한다.
 
 
+### Either 자료 형식
+
+Option의 큰 단점은 예외가 발생했을때 무엇이 잘못되었는지 모른다.
+
+원인을 추적하고 싶을땐 다른 자료형식이 필요하다. 여기선 스칼라 라이브러리에 있는 Either 자료형식을 구현해본다.
+
+
+```
+sealed trait Either[+E, +A]
+case class Left[+E](value: E) extends Either[E, Nothing]
+case class Right[+A](value: A) extends Either[Nothing, A]
+```
+Option과 유사하게 case가 두개 뿐이다. 하지만 둘다 값을 가진다는 차이가 있다.
+
+Right 생성자는 성공
+Left 생성자는 실패. type 매개변수로는 E를 사용한다.
+
+mean 을 Either로 구현해보자
+
+```
+def mean(xs: IndexedSeq[Double]): Either[String, Dobule] = 
+  if (xs.isEmpty)
+    Left("Mean of empty list!")
+  else
+    Right(xs.sum / xs.length)
+```
+
+예외가 발생했다면 Left에 예외를 돌려주면 된다.
+
+```
+def safeDiv(x: Int, y:Int): Either[Exception, Int] = 
+  try Right(x / y)
+  catch { case e: Exception => Left(e) }
+```
+
+```
+def Try[A](a: A): Either[Exception, A] = 
+  try Right(a)
+  catch { case e: Exception => Left(e)}
+```
+
+
+### 4.6 문제풀이 
+#### 문제
+```
+ trait Either[+E, +A] {
+  def map[B](f: A => B): Either[E, B]
+  def flatMap[EE >: E, B] (f:A => Either[EE, B]): Either[EE, B]
+  def orElse[EE >: E, B >: A] (b: Either[EE, B]): Either[EE, B]
+  def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C]
+}
+```
+##### 풀이 
+
+```
+sealed trait Either[+E, +A] {
+  def map[B](f: A => B): Either[E, B] = this match {
+    case Right(a) => Right(f(a))
+    case Left(e)  => Left(e)
+  }
+
+  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = this match {
+    case Right(r) => f(r)
+    case Left(e)  => Left(e)
+  }
+  def orElse[EE >: E, B >: A](b: Either[EE, B]): Either[EE, B] = this match {
+    case Left(_)  => b
+    case Right(r) => Right(r)
+  }
+  def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] =
+    for {
+      a <- this
+      b1 <- b
+    } yield f(a, b1)
+}
+```
+
+
+* 이런 정의가 있으면 Either를 for-comprehension에 사용할 수 있다.(왜냐면 for-comprehension이 flatMap, map을 사용해서 수행하기 때문이다.)
+
+
+### 4.7 문제풀이 
+#### 문제
+* 아래 함수를 구현해라. 발생한 첫 오류를 돌려주어야 한다.
+```
+def sequence[E, A](es: List[Either[E,A]]): Either[E, List[A]]
+
+def traverse[E, A, B](as: List[A])(f: A => Either[E, B]): Either[E, List[B]]
+```
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
