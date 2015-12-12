@@ -712,7 +712,53 @@ def sequence[A](a: List[Option[A]]): Option[List[A]]
 
 ```
 
-### for-comprehension
+### 4.5 문제 풀이
+#### 문제 
+```
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] 
+```
+List요소를 한번씩 훑으면서 f를 처리하는 함수를 구현하라. 
+
+#### 풀이
+
+```
+  // 4.5 
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = a match {
+    case Nil    => Some(Nil)
+    case h :: t => f(h).flatMap { x => traverse(t)(f).map(x :: _) }
+  }
+  
+  def traverseViaMap[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = a match {
+    case Nil => Some(Nil)
+    case h :: t => map2(f(h), traverseViaMap(t)(f))(_ :: _)
+  }
+
+```
+
+### For-Comprehension
+
+스칼라는 승급함수를 자주 쓰기 때문에 for-Comprehension 구문을 제공한다.
+이 구문은 flatMap, map 호출로 풀어버린다. 
+
+map2의 예제
+
+```
+  def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] =
+  	 a.flatMap { x => b.map { y => f(x, y) } }
+```
+
+동일한 코드를 for-Comprehension을 사용한 것이다.
+
+```
+  def mapViaForComprehension[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] =
+    for {
+      aa <- a
+      bb <- b
+    } yield f(aa, bb)
+
+```
+for 중괄호 안에 bindings(aa <- a)가 있고 yield 다음엔 <- 묶음 좌변을 사용할 수 있다. 
+flatMap으로 호출을 전개하고 마지막 묶음과 yield는 map으로 호출로 변환한다.
 
 
 
