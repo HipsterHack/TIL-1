@@ -851,6 +851,22 @@ def sequence[E, A](es: List[Either[E,A]]): Either[E, List[A]]
 def traverse[E, A, B](as: List[A])(f: A => Either[E, B]): Either[E, List[B]]
 ```
 
+#### 풀이
+
+```
+  // 4.7
+  def sequence[E, A](es: List[Either[E, A]]): Either[E, List[A]] = es match {
+    case Nil    => Right(Nil)
+    case h :: t => h.flatMap { x => sequence(t).map { x :: _ } }
+  }
+
+  def traverse[E, A, B](as: List[A])(f: A => Either[E, B]): Either[E, List[B]] = as match {
+    case Nil    => Right(Nil)
+    case h :: t => f(h).flatMap { x => traverse(t)(f).map { x :: _ } }
+  }
+
+```
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
