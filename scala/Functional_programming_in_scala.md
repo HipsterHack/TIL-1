@@ -867,6 +867,51 @@ def traverse[E, A, B](as: List[A])(f: A => Either[E, B]): Either[E, List[B]]
 
 ```
 
+## 5장 엄격성과 나태성
+
+스칼라의 라이브러리를 보면 큰 작업을 여러개의 작은 작업으로 나눈다
+그 다음 작은 작업을 하나 완전히 수행하고 다음작업을 수행한다.
+
+예를 들면
+
+```
+List(1,2,3,4).map(_ + 10 ).filter(_ % 2 == 0).map(_ * 3)
+```
+은 각 요소에 10을 더한 다음
+짝수를 제거하고 
+그 뒤에 3을 곱한다.
+
+
+각 변환은 새 목록을 생성한다. 그 다음 변환에 입력으로만 쓰이고 폐기한다.
+while로 구현할수도 있지만 고수준 합성 스타일 우지하면서 통합이 자동으로 이뤄지도록 하는게 이상적이다.
+이런 비엄격성(나태성)을 이용하면 자동화된 루프 이용이 가능해짐. 
+
+### 5,1 엄격한 함수 엄격하지 않은 함수
+엄격한 함수: 항상 파라미터를 평가한다.
+대부분의 프로그래밍 언어가 엄격한 함수를 지원한다. 
+예) 
+```
+  def square(x: Double): Double = x * x
+```
+
+비엄격 함수: 함수가 하나 이상의 파라미터를 평가 히지않을 수도 있다.(평가하기도 한다)
+* 비 엄격의 표현의 예로 && 와 Boolean을 생각할 수 있다.
+* if도 함수라 생각하면 비엄격 부류다.
+```
+val result = if (input.isEmpty) sys.error("empty input") else input
+```
+좀 더 깔끔한 구문을 만들어보면
+```
+def if2(cond:Boolena, onTrue: () =>, onFalse: () => A): A = 
+  if(conf) onTrue() else onFalse()
+
+// 예제
+if2( a< 22 , () => println("a"), () => println("b"))  
+```
+
+파라미터 중 평가를 미루는 경우는 Type바로 앞에 () => 를 넣어준다
+
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
