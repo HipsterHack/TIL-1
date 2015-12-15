@@ -909,11 +909,12 @@ def if2(cond:Boolena, onTrue: () =>, onFalse: () => A): A =
 if2( a< 22 , () => println("a"), () => println("b"))  
 ```
 
-파라미터 중 평가를 미루는 경우는 Type바로 앞에 () => 를 넣어준다
-
-표현식을 평가하지 않는 것을 성크thunk 라고 한다.
-
-thunk는 메소드에서 참조할때 마다 호출한다
+### Thunk () => 
+* 파라미터 중 평가를 미루는 경우는 Type바로 앞에 () => 를 넣어준다
+* 표현식을 바로 평가하지 않는 것을 성크thunk 라고 한다.
+* thunk는 메소드에서 참조할때 마다 호출한다
+* () => A는 함수다.(파라미터는 없고 리턴값이 A인 함수)
+* a: () => A 이면 a는 바로 평가하지 않음.
 
 예를 들어
 
@@ -973,6 +974,11 @@ val h1 = x.headOption
 val h2 = x.headOption
 ```
 
+### smart constructer
+
+* 위의 예제에서 Stream.cons  가 그 예제. 
+* lazy 를 이용해서 함수 결과를 캐싱한다.
+* apply 에보면 성크로 감쌌기 때문에 head 값이 필요하기 전까지 평가하지 않는다.
 
 
 ## 참고 자료 
