@@ -911,6 +911,69 @@ if2( a< 22 , () => println("a"), () => println("b"))
 
 파라미터 중 평가를 미루는 경우는 Type바로 앞에 () => 를 넣어준다
 
+표현식을 평가하지 않는 것을 성크thunk 라고 한다.
+
+thunk는 메소드에서 참조할때 마다 호출한다
+
+예를 들어
+
+```
+def maybeTwice(b: Boolean, i: => Int ) = if(b) i + i else 0
+
+val x = maybeTwice(true, { println("hi"); 1 + 41})
+// hi
+// hi
+// 82
+
+```
+
+캐싱을 적용해서 한번만 평가하려면? lazy 키워드를 사용해라
+
+```
+def maybeTwice2(b: Boolean, i: => Int) = {
+	lazy val j = i
+	if (b) j + j else 0
+}
+
+```
+
+비엄격 함수의 인수는 이름으로 전달한다(call by name)
+
+* 엄격성의 정의 : 표현식의 평가가 무한히 실해되면 한정한 값을 돌려주지 않고 오류를 던진다면 종료되지 않는  표현식 혹은 바닥 표현식이라고 한다.
+만일 바닥으로 평가하는 모든 x에 대해 표현식 f(x)가 바닥이면 그 함수는 엄격한 함수다.
+
+## 5.2 게으른 List(=Stream)
+
+```
+sealed trait Stream[+A]
+case object Empty extends Stream[Nothing]
+case class Cons[+A] (h: () => A, t: () => Stream[A]) extends Stream[A]
+object Stream {
+	def cons[A] (hd: => A, tl => Stream[A]): Stream[A] = {
+		lazy val head = hd
+		lazy val tail = tl
+		Cons(()=> head, () => tail)
+	}
+	def empty[A]: Stream[A] = Empty
+
+	def apply[A](as: A*): Stream[A] = 
+		if (as.isEmpty) empty else cons(as.head, apply(as.tail: _*))
+	def headOption: Option[A] = this match {
+		case Empty => None
+		case Cons(h, t) => Some(h())
+	}
+}
+```
+
+### 스트림 메모화를 통한 재계산 피하기
+일반 생성자를 호출하면 expensive를 두번 호출한다.
+```
+val x = Cons(() => expensive(x), tl)
+val h1 = x.headOption
+val h2 = x.headOption
+```
+
+
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
