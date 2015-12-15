@@ -902,12 +902,13 @@ val result = if (input.isEmpty) sys.error("empty input") else input
 ```
 좀 더 깔끔한 구문을 만들어보면
 ```
-def if2(cond:Boolena, onTrue: () =>, onFalse: () => A): A = 
+def if2(cond:Boolena, onTrue: () => A, onFalse: () => A): A = 
   if(conf) onTrue() else onFalse()
 
 // 예제
 if2( a< 22 , () => println("a"), () => println("b"))  
 ```
+*  () => println("a")는 () => A를 생성하는 함수 리터럴이다. (() => A는 Function0[A] 형식)
 
 ### Thunk () => 
 * 파라미터 중 평가를 미루는 경우는 Type바로 앞에 () => 를 넣어준다
@@ -915,6 +916,7 @@ if2( a< 22 , () => println("a"), () => println("b"))
 * thunk는 메소드에서 참조할때 마다 호출한다
 * () => A는 함수다.(파라미터는 없고 리턴값이 A인 함수)
 * a: () => A 이면 a는 바로 평가하지 않음.
+* a: () => A 일때 a()이면 강제로 평가함.
 
 예를 들어
 
