@@ -986,6 +986,73 @@ val h2 = x.headOption
 * apply 에보면 성크로 감쌌기 때문에 head 값이 필요하기 전까지 평가하지 않는다.
 
 
+### 5.1 연습문제
+#### 문제 
+* Stream trait 내부에 toList를 만들어라
+
+#### 풀이
+* 내부 함수로 푸는 형태
+* recursive하게 푸는 형태
+* Tail Recursion을 이용하는 형태가 있다.
+* Thunk가 있기 때문에(() => A) 강제로 평가 시킬 필요가 있다.
+```
+  def toListRecursive: List[A] = {
+    def go(l: Stream[A]): List[A] = l match {
+      case Cons(h, t) => h() :: go(t())
+      case _          => List()
+    }
+    go(this)
+  }
+  def toListRecursive2: List[A] = this match {
+    case Cons(h, t) => h() :: t().toListRecursive2
+    case _          => List()
+  }
+  def toList: List[A] = {
+    @tailrec
+    def go(l: Stream[A], acc: List[A]): List[A] = l match {
+      case Cons(h, t) => go(t(), h() :: acc)
+      case _          => acc
+    }
+    go(this, List()).reverse
+  }
+```
+### 5.2 연습문제
+#### 문제 
+* take, drop을 구현해라
+
+#### 풀이
+* 스마트 constructor를 이용했다. 
+* 역시나 강제로 값을 평기해야 한다.
+```
+  def take(n: Int): Stream[A] = this match {
+    case Cons(h, t) if n > 1  => Stream.cons(h(), t().take(n - 1))
+    case Cons(h, _) if n == 0 => Stream.cons(h(), Empty)
+    case _                    => Empty
+  }
+
+  def drop(n: Int): Stream[A] = {
+    @tailrec
+    def go(s: Stream[A], n: Int): Stream[A] = s match {
+      case Cons(h, t) if n > 0 => go(t(), n - 1)
+      case _                   => s
+    }
+    go(this, n)
+  }
+
+```
+### 5.2 연습문제
+#### 문제 
+* takeWhile을 구현해라
+
+#### 풀이
+
+```
+  def takeWhile(p: A => Boolean): Stream[A] = this match {
+    case Cons(h, t) if p(h()) => Stream.cons(h(), t().takeWhile(p))   
+    case _ => Empty
+  }
+```
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
