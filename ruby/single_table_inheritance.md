@@ -51,6 +51,16 @@ end
  Item.where(type: 'Source') 
 ```
 
+## ERB 헬퍼메소드 사용시 주의점
+
+###  STI를 사용하는 모델을 같은 form에서 수정시
+* form_for를 사용하면 id가 할당한 모델 클래스 이름을 input id, name의 prefix로 사용한다. 
+* 위 예제에선 meat[name] 과 같이 생성한다. 
+* 이런 ROR 동작 방식 때문에 form_for 에 STI를 쓴 경우엔 form_for에 as를 꼭 써줘야 입력 파라미터를 못찾는다는 오류가 없다.
+* as로 슈퍼 클래스인 item으로 지정하면 모델 클래스에 상관 없이 동일한 포맷으로 form을 전송할 수 있다.
+```
+<%= form_for(@item, as: :item, url: url, method: method, :html => {:multipart => true, class: "form-horizontal item_form" } ) do |f| %>
+```
 
 
 ## 참고 
