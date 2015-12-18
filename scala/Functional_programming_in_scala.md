@@ -1053,6 +1053,67 @@ val h2 = x.headOption
   }
 ```
 
+### 5.3 프로그램 서술과 평가의 분리
+
+* 관심사의 분리
+계산의 서술과 실제 실행과 분리가 권장됨.
+ex) 1급 함수는 일부 계산을 함수 내부에 가지고 있지만 계산은 파라미터가 전달되어야만 실행한다.
+
+나태성을 통해 표현식 서술을 그 표현식의 평가와 분리가 가능하다
+
+Stream.exists 예제
+
+```
+  def exists(p: A => Boolean): Boolean = this match {
+    case Cons(h, t) => p(h()) || t().exists(p)
+    case _          => false
+  }
+
+```
+
+|| 는 두번째 파라미터에 엄격하지 않다. 
+p(h()) 가 true이면 스트림을 더 훑지 않는다. 즉 tail로 exists를 실제로 수행하지 않는다.
+위에선 명시적 재귀를 사용해서 구현했지만 exists는 foldRight로도 구현할 수 있다. 단 laziness 이다.
+
+우선은 foldRight부터 보자.
+```
+  def foldRight[B](z: => B)(f: (A, => B) => B): B = this match {
+    case Cons(h, t) => f(h(), t().foldRight(z)(f))
+    case _          => z
+  }
+
+  def existViaFoldRight(p: A => Boolean): Boolean =
+    foldRight(false)((a, b) => p(a) || b)
+
+```
+f가 둘째 파라미터를 평가에 엄격하지 않다.  f가 둘째 파라미터를 평가하지 않기로 했다면 순회가 일찍 종료된다.
+
+이제 existViaFoldRight 설명이다. b는 스트림 tail을 fold하는 단계이지만 평가되지 않을 수 있다. p(a)가 true 라면 
+b는 평가되지 않는다.
+(단 스택 safe하진 않다.)
+
+
+#### 연습문제
+##### 문제 5.4
+* forAll을 구현해라 
+* 단, 중간에 조건을 만족하면 순회하지 말아야 한다.
+```
+ def forAll(p: A => Boolean): Boolean
+```
+##### 풀이
+* || 를 이용해서 뒷 연산을 하지 않도록 처리 했다.
+* existViaFoldRight 과 구현이 거의 동일하다.
+```
+  def forAll(p: A => Boolean): Boolean = this match {
+    case Cons(h, t) => p(h()) || t().forAll(p)
+    case _          => false
+  }
+  def forAllViafoldRight (p: A => Boolean): Boolean = 
+  	foldRight(false)((a, b) => p(a) || b )
+```
+
+
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
