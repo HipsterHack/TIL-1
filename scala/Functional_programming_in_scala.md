@@ -1111,8 +1111,30 @@ b는 평가되지 않는다.
   def forAllViafoldRight (p: A => Boolean): Boolean = 
   	foldRight(false)((a, b) => p(a) || b )
 ```
+#### 문제 5.5
+* foldRight을 이용해서 takeWhile을 구현해라
+##### 풀이
+```
+  // 5.5. 
+  def takeWhileViaFoldRight(p: A => Boolean): Stream[A] =
+    foldRight(Stream[A]())((a, b) => if (p(a)) Stream.cons(a, b) else Empty)
+```
 
+#### 문제 5.6
+* foldRight을 이용해서 headOption을 구현해라 
 
+####  풀이 
+* 패턴매칭과 foldRight으로 구현함
+* Option의 foldRight 특성을 이해해야 정확히 풀수 있다.
+```
+  def headOptionViaFoldRight: Option[A] =
+    foldRight(None: Option[A])((a, b) => b match {
+      case None    => Some(a)
+      case Some(h) => Some(h)
+    })
+  def headOption2ViaFoldRight: Option[A] =
+    foldRight(None: Option[A])((h, _) => Some(h))
+```
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
