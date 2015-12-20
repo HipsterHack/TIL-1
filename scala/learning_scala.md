@@ -524,7 +524,92 @@ for (data <- 0 to list2.length()){
 }
 
 ```
+### 함수 콤비네이터
+* 콤비네이터는 함수와 컬렉션 등 다른 식을 받아서 적절한 작업을 해주는 조합 장치(함수)이다. 
+* map과 같은 함수를 콤비네이터(combinator)라 부른다.
+* scala의 표준 데이터 구조에서 많이 사용한다.
 
+#### foldLeft
+* foldLeft는 리스트나 스트림 왼쪽부터 순회하며 결과가 누적된다.
+```
+    val list = List(1, 2, 3, 4, 5)
+    list.foldLeft(0)({ (a, b) => println(b); 1 })
+(0,1)
+(1,2)
+(3,3)
+(6,4)
+(10,5)
+```
+#### foldRight
+
+* foldRight는 리스트나 스트림 오른쪽부터 순회하며 결과가 누적된다.
+```
+    val list = List(1, 2, 3, 4, 5)
+    list.foldRight(0)({ (a, b) => println(a, b); a + b })
+(5,0)
+(4,5)
+(3,9)
+(2,12)
+(1,14)
+```
+
+#### map
+리스트에 모든 원소에 고차함수를 파라미터로 받아서 적용한 결과를 돌려주는 함수다.
+map은 승급시킨다고도 한다.
+
+#### flatten
+flatten은 내포단계를 하나 줄여서 내포된 리스트의 원소를 상위 리스트로 옮겨준다.
+```
+ List(List(1, 2), List(3, 4)).flatten
+ List[Int] = List(1, 2, 3, 4)
+```
+
+#### flatMap
+* flatMap은 map과 flatten을 합성한 것이다. 중첩요소를 풀어버리고(승급개념이다. Future, Option에서 실제 값을 구하거나 할때 유용하다.) map을 적용한다. 그리고 결과는 새 List,Stream을 만들어 return 한다. 
+```
+flatMap[B](f: A => Container[B]): Container[B]
+```
+* 예제 
+```
+List(List(1, 2), List(3, 4)).flatMap(_ + 2)
+
+List(3,4,5,6)
+```
+* for-comprehension으로 대체할 수도 있다. (Option에서 특히) 
+* 아래는 그 예제 
+```
+val chars = 'a' to 'z'
+val perms = chars flatMap { a => 
+  chars flatMap { b => 
+    if (a != b) Seq("%c%c".format(a, b)) 
+    else Seq() 
+  }
+}
+
+val perms = for {
+  a <- chars
+  b <- chars
+  if a != b
+} yield "%c%c".format(a, b)
+```
+* Option 사용할 때도 바꿀 수 있다.
+```
+val host: Option[String] = ...
+val port: Option[Int] = ...
+
+val addr: Option[InetSocketAddress] =
+  host flatMap { h =>
+    port map { p =>
+      new InetSocketAddress(h, p)
+    }
+  }
+  
+  val addr: Option[InetSocketAddress] = for {
+  h <- host
+  p <- port
+} yield new InetSocketAddress(h, p)
+```
+* 위에는 [스칼라 스쿨 예제](http://twitter.github.io/effectivescala/#Functional programming-`flatMap`)
 
 ### 유용한 함수들(static 형태로 제공함)
 
