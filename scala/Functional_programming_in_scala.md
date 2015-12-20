@@ -1136,6 +1136,28 @@ b는 평가되지 않는다.
     foldRight(None: Option[A])((h, _) => Some(h))
 ```
 
+#### 문제 5.7
+* foldRight을 이용해서 map, filter, append, flatMap을 구현해라. 단 append는 non-strict 하지 않게 해라
+* def mapViaFoldRight filterViaFoldRight appendViaFoldRight flatMapViaFoldRight
+
+####  풀이 
+```
+  def mapViaFoldRight[B](f: A => B): Stream[B] =
+    foldRight(Stream[B]())((a, b) => Stream.cons(f(a), b))
+
+  def filterViaFoldRight(f: A => Boolean): Stream[A] =
+    foldRight(Stream[A]())((a, b) => if (f(a)) Stream.cons(a, b) else b)
+
+  def appendViaFoldRight[B >: A](s: => Stream[B]): Stream[B] =
+    foldRight(s)((a, b) => Stream.cons(a, b))
+
+  def flatMapViaFoldRight[B](f: A => Stream[B]): Stream[B] =
+    foldRight(Empty: Stream[B])((a, b) => f(a) appendViaFoldRight b)
+
+}
+```
+
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
