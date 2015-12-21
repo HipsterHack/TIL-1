@@ -1158,6 +1158,130 @@ b는 평가되지 않는다.
 ```
 
 
+
+## 
+* 연습문제의 Stream의 메소드 구현은 점진적이다. 전체 결과를 생성하지 않고 참조 시점에 실제 계산을 한다
+```
+Stream(1,2,3,4).map( _ + 10 ).filter( _ % 2 == 0)
+```
+### 추적과정
+```
+Stream(1,2,3,4).map( _ + 10 ).filter( _ % 2 == 0).toList
+cons(11, Stream(2,3,4).map(_ + 10)).filter( _ % 2 == 0).toList
+Stream(2,3,4).map( _ + 10 ).filter( _ % 2 == 0).toList
+cons(12, Stream(3,4).map( _ + 10 )).filter( _ % 2 == 0).toList
+12 :: cons(13, Stream(4).map( _ + 10 )).filter( _ % 2 == 0).toList
+... 중략
+
+ 12 :: 14 :: List()
+```
+* map과 filter 변환이 엇갈리는 방식이다.
+* map등 중간 스트림이 완전히 인스턴스를 만들지 않는다. 
+* 이를 일급 루프 라고 부르는 사람도 있다.
+* 중간 스트림이 필요이상으로 데이터를 처리하지 않기 때문에 이런 combiner를 독창적인 방식으로 사용하는 경우가 있다
+
+```
+def find(p: A => Boolean): Option[A] =
+  filter(p).headOption
+```
+* 메모리 사용에도 효율적이다. 딱 필요한 만큼만 메모리를 쓰고 나머지는 GC처리 할 수 있도록 만든다.
+
+## 무한 스트림과 공재귀
+
+```
+val ones : Stream[Int] = Stream.cons(1, ones)
+```
+위 코드는 무한히 나열하는 stream 예제이다. 자기 자신을 참조하는 방식으로 만들어져 있다.
+다만 지금까지 작성한 함수는 필요한 만큼만 결과를 출력한다
+```
+ones.take(5).toList
+List[Int] = List(1,1,1,1,1)
+
+ones.exists( _ % 2 != 0)
+Boolean = true
+
+ones.map(_ + 1).exists( _ % 2 == 0)
+ones.takeWhile( _ == 1 )
+ones.forAll( _ != 1)
+```
+
+### 5.8 문제풀이
+* 무한 스트림을 만드는 메소드를 만들어라
+```
+def constant[A](a: A): Stream[A]
+```
+#### 풀이
+```
+  def constant[A](a: A): Stream[A] = {
+    lazy val tail: Stream[A] = Cons(() => a, () => tail)
+    tail
+  }
+
+  def constantViaSmartcons[A](a: A): Stream[A] =
+    cons(a, constantViaSmartcons(a))
+
+```
+
+### 5.8 문제풀이
+* 무한 스트림을 만드는 메소드를 만들어라
+```
+def constant[A](a: A): Stream[A]
+```
+#### 풀이
+* constant가 좀더 효율적이다. 자기 자신 한개만 참조하도록 만들어져 있다.
+```
+  def constant[A](a: A): Stream[A] = {
+    lazy val tail: Stream[A] = Cons(() => a, () => tail)
+    tail
+  }
+
+  def constantViaSmartcons[A](a: A): Stream[A] =
+    cons(a, constantViaSmartcons(a))
+
+```
+### 5.9 문제풀이
+* n부터 1씩 증가하는 무한 스트림을 만들어라
+```
+def from(n: Int): Stream[Int]
+```
+#### 풀이
+```
+def from(n: Int): Stream[Int] = cons(n, from(n + 1))
+```
+### 5.10 문제
+* 피보나치수열을 만드는 메소드를 만들어라
+#### 풀이
+```
+  val fibs = {
+    def go(f0: Int, f1: Int): Stream[Int] = {
+      lazy val tail: Stream[Int] = cons(f1, go(f0, f0 + f1))
+      tail
+    }
+    go(0, 1)
+  }
+```
+### 5.11
+* 일반화시킨 무한 스트림을 만드는 함수를 만들어라
+```
+def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A]
+```
+#### 풀이 
+```
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
+    f(z) match {
+      case Some((a, s)) => cons(a, unfold(s)(f))
+      case None         => Empty
+    }
+
+```
+
+* unfold는 공재귀(corecursive)함수다. 
+* 재귀는 자료를 소비하지만 공재귀는 자료를 생산한다.
+* 공재귀는 생산성이 유지되는 한 종료하지 않아도 된다.
+* 공재귀를 보호되는 재귀(guarded recursion, 생산성을 공종료(cotermination) 라고 부른다.
+
+
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
