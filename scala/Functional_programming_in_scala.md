@@ -1026,7 +1026,7 @@ val h2 = x.headOption
 ```
   def take(n: Int): Stream[A] = this match {
     case Cons(h, t) if n > 1  => Stream.cons(h(), t().take(n - 1))
-    case Cons(h, _) if n == 0 => Stream.cons(h(), Empty)
+    case Cons(h, _) if n == 1 => Stream.cons(h(), Empty)
     case _                    => Empty
   }
 
@@ -1040,7 +1040,7 @@ val h2 = x.headOption
   }
 
 ```
-### 5.2 연습문제
+### 5.3 연습문제
 #### 문제 
 * takeWhile을 구현해라
 
@@ -1280,7 +1280,22 @@ def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A]
 * 공재귀는 생산성이 유지되는 한 종료하지 않아도 된다.
 * 공재귀를 보호되는 재귀(guarded recursion, 생산성을 공종료(cotermination) 라고 부른다.
 
+### 5.12 연습문제
+#### 문제 
+* unfold를 이용해서 fibs, constant, ones, from을 구현해라
 
+#### 풀이
+```
+  val fibsViaUnfold = unfold[Int, (Int, Int)]((0, 1)) { s => Some((s._1, (s._2, s._1 + s._2))) }
+
+  def fromViaUnfold(n: Int): Stream[Int] = unfold(n) { s => Some((s, s + 1)) }
+
+  def constantViaUnfold[A](a: A): Stream[A] = unfold(a) { s => Some((s, s)) }
+
+  val onesViaViaUnfold = unfold(1) { s => Some((1, 1)) }
+```
+
+#### 풀이
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
