@@ -1,10 +1,21 @@
 # 스칼라 정리
 이 페이지에서는 스칼라 공부하면서 배운 내용을 정리합니다.
 
+
 ## 함수형 프로그래밍
 * 스칼라로 함수형 프로그래밍을 하면 모듈성이 증가한다
 * 이 때문에 일반화 병렬화 가 쉽고 모듈성이 증가한다.
 * 다만, 재귀호출을 자주 사용하므로 언어레벨에서 지원하는 최적화가 중요하다
+
+### 용어 정리
+* 일급함수 - 다른 함수를 파라미터로 받거나 반환한다.
+* 고차함수 - 함수를 파라미터로 받는  함수
+* 순수함수 - side effect가 없는 함수
+* side effect- 함수 스코프에서 벗어난 외부 객체를 변경하는 것을 말함.
+
+
+
+
 
 ### 함수형 프로그래밍 방법
 * 메소드는 부수효과가 없어야 한다.
@@ -208,7 +219,7 @@ class Soinata extends Car with Hyundi with Tunable {
 * 트레잇은 간결한 인터페이스를 확장해 풍부한 인터페이스로 사용할 수 있다.
 메소드를 구현해서 넣어도 되기 때문이다.
 * 나머지는 쌓을수 있는 변경을 정의 하는 것.
-
+* 속도는 클래스에 비해 느리다.
 
 ## 스칼라 scope
 
@@ -252,7 +263,7 @@ to를 이용해서 루프를 돈다.
   }
 ```
 
-* for yield 예제
+* for yield 예제(for-expression)
 
 ```
 numList = List(1,2,3,4,5,6,7,8,9,10)
@@ -261,9 +272,10 @@ var retVal = for { var a <- numList
                  } yield a
 ```
 
-스칼라는 위 예제에서 retVal은 numList와 같은 타입으로 저장한다.
+* 스칼라는 위 예제에서 retVal은 numList와 같은 타입으로 저장한다.
+* yield 옆의 a는 저장할 형태의 expression이다.
+* flatMap은 for-expression로 구현할 수 있다.
 
-yield 옆의 a는 저장할 형태의 expression이다.
 
 
 * while 예제
@@ -901,7 +913,14 @@ val friend = firstArg match {
 
 println(friend)
 ```
-
+### 뷰 바운드
+* 묵시적(implicit) 함수는 이 함수가 호출되야 타입 추론이 가능한 경우에 호출된다.
+* 다른 두 타입을 같은 타입으로 볼 수 있다고 지정한다.
+* 뷰 바운드는 타입 변환 함수가 있다고 강제할때 사용한다.뷰 바운드는 아래 예에서와 같이 <%로 표시한다.
+```
+class Container[A <% Int] { def addIt(x: A) = 123 + x }
+```
+* 위 예제는 A는 Int로 간주할 수 있다고 해야한다.
 ## 공부하기 좋은 자료들
 * [Scala school](https://twitter.github.io/scala_school/ko/basics.html)
 * [Effective scala](http://twitter.github.io/effectivescala/)
