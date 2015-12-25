@@ -94,7 +94,7 @@ def index = Action {
 def index = Action {
   Redirect("/user/home", MOVED_PERMANENTLY)
 }
-```3
+```
 
 ### TODO 
 더미 페이지로 나중에 만들 건 아래처럼 지정할 수도 있다.
