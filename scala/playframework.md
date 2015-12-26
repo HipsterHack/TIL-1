@@ -149,3 +149,123 @@ GET   /clients/:id          controllers.Clients.show(id: Long)
 ```
 GET, POST, PUT, DELETE, HEAD
 ```
+
+### URI pattern
+* URI 패턴은 request를 지정한 규칙에 맞게 라우트한다.
+#### static path
+* 아래는 정적 경로 예제다.
+```
+GET   /clients/all          controllers.Clients.list()
+```
+
+#### 동적 패턴
+* regexp `[^/]+`처럼 만들수 있다.
+* 또한 `:{글자}`로 쓸수도 있다. 이건 바로 URI에 매칭된다.
+```
+GET   /clients/:id          controllers.Clients.show(id: Long)
+```
+* 동적 패턴을 사용하려면 `*name`을 형태를 사용한다. 아례 예제를 보자.
+
+```
+GET   /files/*name          controllers.Application.download(name)
+```
+* files 뒤에 어떤 내용이 오든 name에 들어가게 된다. 예를 들어 `/files/images/test.png`이면 `name`에는 `images/test.png` 값이 들어간다.
+
+##### 커스텀 regexp
+* `$id<regex>`를 사용한다. id는 파라미터로 넘어갈 값의 이름 
+```
+GET   /items/$id<[0-9]+>    controllers.Items.show(id: Long)
+```
+
+##### Action 생성기 메소드 호출
+
+* 만약 action에서 파라미터를 안받을 거면 
+```
+GET   /                     controllers.Application.homePage()
+```
+* 파리미터를 받을거면 play는 요청 URI에서 값을 찾거나 query string에서 찾는다.
+```
+# /1 -> 1page
+GET   /:page                controllers.Application.show(page)
+```
+이거나
+
+```
+# /?page=1 -> 1page
+GET   /                     controllers.Application.show(page)
+```
+
+###### 파라미터 타이핑 
+
+파라미터 타이핑은 옵션이다. `String`이 기본이다. 타입을 결정하고 싶거든 명시적으로 타입을 지정해라
+
+```
+GET   /clients/:id          controllers.Clients.show(id: Long)
+```
+* 위에서 설정한 메소드의 선언부이다. 
+```
+def show(id: Long) = Action {
+  Client.findById(id).map { client =>
+    Ok(views.html.Clients.display(client))
+  }.getOrElse(NotFound)
+}
+
+```
+###### 파라미터 타이핑 
+
+* 고정된 값을 넘기고 싶다면?
+```
+# 고정된 값인 home이 넘어간다.
+GET   /                     controllers.Application.show(page = "home")
+GET   /:page                controllers.Application.show(page)
+```
+
+* 기본값을 지정하려면? 아래처럼 하자.
+```
+GET   /clients              controllers.Clients.list(page: Int ?= 1)
+```
+
+* 옵션 파라미터면? Option을 활용하자.
+
+```
+GET   /api/list-all         controllers.Api.list(version: Option[String])
+```
+
+
+##### 라우팅 우선순위
+
+* 두개의 라우팅이 충돌나면 먼저 선언한걸 우선으로 사용한다.
+
+##### 역 라우팅 
+
+* 컨트롤러에서 route에 있는 URI로 변환 할 수 있다. 
+* RoR의 `_path`시리즈와 같은 것이다. 
+* redirect 에서 주로 사용한다.
+
+* 예를 들어 
+```
+package controllers
+
+import play.api._
+import play.api.mvc._
+
+class Application extends Controller {
+
+  def hello(name: String) = Action {
+    Ok("Hello " + name + "!")
+  }
+
+}
+```
+처럼 컨트롤러를 선언하고 아래처럼 URL을 매핑했다면 
+```
+GET   /hello/:name          controllers.Application.hello(name)
+```
+* 컨트롤러의 다른 메소드에서 `/hello/Bob`을 아래처럼 호출할 수 있다. 
+
+```
+def helloBob = Action {
+  Redirect(routes.Application.hello("Bob"))
+}
+```
+
