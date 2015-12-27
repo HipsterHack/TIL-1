@@ -269,3 +269,57 @@ def helloBob = Action {
 }
 ```
 
+
+
+## Result 값을 변화시키기 
+
+암묵적으로 response body에 따라 설정되어 있다.
+예를 들면 
+```
+val textResult = Ok("Hello World!")
+```
+이면 `Content-Type` 헤더는 `text/plain`이다  
+반면, 
+
+```
+val xmlResult = Ok(<message>Hello World!</message>)
+```
+
+이면 XML이 result이다.
+
+그러면 수동으로 지정하려면 어떻게할까?
+
+as(newContentType)을 사용하면 된다.
+
+```
+val htmlResult = Ok(<h1>Hello World!</h1>).as("text/html")
+```
+이나 
+```
+val htmlResult2 = Ok(<h1>Hello World!</h1>).as(HTML)
+```
+위 두가지 방식이 있다. 
+
+### Http Header 변경
+* `withHeaders`를 호출하면 된다.
+
+```
+val result = Ok("Hello World!").withHeaders(
+  CACHE_CONTROL -> "max-age=3600",
+  ETAG -> "xx")
+```
+
+#### 쿠키 설정
+
+* `withCookies`로 설정하고 `discardingCookies`로 쿠키를 제거한다.
+* 쿠키 생성 
+```
+val result = Ok("Hello world").withCookies(
+  Cookie("theme", "blue"))
+```
+* 쿠키 제거 
+```
+val result2 = result.discardingCookies(DiscardingCookie("theme"))
+// 쿠키를 두개 설정하고 나머지 하나는 제거
+val result3 = result.withCookies(Cookie("theme", "blue")).discardingCookies(DiscardingCookie("skin"))
+```
