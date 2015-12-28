@@ -323,3 +323,77 @@ val result2 = result.discardingCookies(DiscardingCookie("theme"))
 // 쿠키를 두개 설정하고 나머지 하나는 제거
 val result3 = result.withCookies(Cookie("theme", "blue")).discardingCookies(DiscardingCookie("skin"))
 ```
+
+
+### Session 와 Flash scopes
+* 여러 HTTP request에 공통으로 사용해야하는 데이터가 있는 경우 session이나 flash 를 사용한다.
+* flash는 다음 request까지만 유효할 때 사용한다.
+* 세션과 플래시 scope은 cookie 매커니즘을 이용해 구현한다. 
+* session은 `PLAY_SESSION` 라는 이름으로 쿠키에 저장된다.
+* application.conf의 `session.cookieName`으로 바꿀 수 있다.
+
+#### 세션
+* 아래처럼 전체 세션을 대체할 수 있다.
+```
+Ok("Welcome!").withSession(
+  "connected" -> "user@gmail.com")
+```
+* 단순히 추가하려면
+```
+Ok("Hello World!").withSession(
+  request.session + ("saidHello" -> "yes"))
+```
+* 삭제 하려면?
+```
+Ok("Theme reset!").withSession(
+  request.session - "theme")
+```
+* 세션 값 읽기 
+```
+def index = Action { request =>
+  request.session.get("connected").map { user =>
+    Ok("Hello " + user)
+  }.getOrElse {
+    Unauthorized("Oops, you are not connected")
+  }
+```
+* 전체 세션값을 삭제 하려면
+```
+Ok("Bye").withNewSession
+```
+
+####  Flash scope
+
+* 데이터를 다음 request까지만 유지한다
+* 유저가 수정할 수 있다.
+* 단순히 알림이나 오류 성공 메시지 전달할때만 쓰자.
+* 아래는 그 예제다 
+```
+def index = Action { implicit request =>
+  Ok {
+    request.flash.get("success").getOrElse("Welcome!")
+  }
+}
+
+def save = Action {
+  Redirect("/home").flashing(
+    "success" -> "The item has been created")
+}
+```
+
+* 뷰에서 flash scope의 값을 보고 싶을 때는 implicit Flash parameter로 설정 해야한다.
+```
+@()(implicit flash: Flash)
+...
+@flash.get("success").getOrElse("Welcome!")
+...
+```
+
+* 액션에서 `implicit request =>`를 쓰는 경우 뷰에 implicit request에 기반한  implicit Flash가  제공될 것이다. 
+```
+def index = Action { implicit request =>
+  Ok(views.html.index())
+}
+```
+
+
