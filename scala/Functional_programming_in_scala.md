@@ -1327,6 +1327,35 @@ def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A]
     case (Empty, Empty)             => None
   }
 ```
+### 5.14 연습문제
+#### 문제 
+* unfold를 이용해서 mapViaUnfold, takeViaUnfold, talkeWhileViaUnfold, zipWith, zipAll을 구현해라
+```
+ def startsWith[A](s: Stream[A]): Boolean
+```
+#### 풀이
+* zipAll, takeWhile, forAll을 이용해서 풀면된다.
+* 구현한 함수를 이용해서 합성으로 문제풀이를 하면된다.
+* `fc(x) = f(c(x))` 형태로 문제를 풀자.
+```
+  def startsWith[A](s: Stream[A]): Boolean = zipAll(s).takeWhile( a => !a._2.isEmpty ).forAll{
+    case (h1,h2) => h1 == h2
+  }
+```
+### 5.15 연습문제
+#### 문제 
+* unfold를 이용해서 tails를 만들자.
+* `Stream(1,2,3).tails == Stream(Stream(1,2,3), Stream(2,3), Stream(3))`
+```
+def tails: Stream[Stream[A]]
+```
+#### 풀이
+```
+  def tails: Stream[Stream[A]] = Stream.unfold(this){
+    case Empty => None
+    case s => Some((s, s drop 1)) 
+  } appendViaFoldRight Stream(Empty)
+```
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
