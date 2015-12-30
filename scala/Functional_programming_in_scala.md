@@ -1357,6 +1357,29 @@ def tails: Stream[Stream[A]]
   } appendViaFoldRight Stream(Empty)
 ```
 
+### 5.16 연습문제
+#### 문제
+
+* tails를 일반화한 scanRight함수를 작성하라. 이 함수는 중간결과의 스트림을 돌려주는 foldRight다.
+예로 
+```
+Stream(1, 2, 3).scanRight(0)(_ + _).toList
+List(6,5,3,0)
+List(1+2+3+0, 2+3+0, 3+0, 0) // 이 표현과 동등
+```
+* unfold를 못쓰는 이유는? 
+#### 풀이
+* unfold는 좌에서 우로 stream을 생성하기 때문에 쓸 수 없다.
+* foldRight를 이용해서 풀 수 있다. 
+```
+ def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =
+    foldRight((z, Stream(z)))((a, b) => {
+      lazy val b2 = b
+      val r = f(a, b2._1)
+      (r, Stream.cons(r, b2._2))
+    })._2
+```
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
