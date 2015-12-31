@@ -927,6 +927,69 @@ println(friend)
 class Container[A <% Int] { def addIt(x: A) = 123 + x }
 ```
 * 위 예제는 A는 Int로 간주할 수 있다고 해야한다.
+
+## 지연 평가
+* 표현식을 함수로 만들거나 lazy 수식자를 달아준다..
+* 이렇게 하면 바로 평가를 바로 하지 않고 평가가 꼭 필요한 시점에 평가한다.
+
+### 함수화
+* () => expr 형태로 표현한다.
+```
+> () => println("a")
+res0: () => Unit = <function0>
+```
+함수로 만든 표현식을 변수에 할당하면 지연평가를 할 수 있다.
+### lazy 수식어
+* val 앞에 lazy를 붙이는 형태로 수식어를 사용한다.
+* 실제 불릴때 까지 scala가 평가하지 않는다
+```
+object Demo {
+  lazy val x = { println("initialze x"); "done" }
+}
+
+Demo
+Demo.x // 이때 초기화하고 수행한다.
+```
+* 지연 val 값은 계산하고 저장한다. 그리고 저장한 값을 재사용한다.(두번 다시 평가 안한다)
+
+#### 예제
+
+```
+trait LazyRationalTrait {
+  val numerArg : Int
+  val denomArg : Int
+  lazy val numer = numerArg / g
+  lazy val denom = denomArg / g
+  override def toString = numer + "/" + denom
+  private lazy val g = {
+    require (denomArg != 0)
+    gcd(numerArg, denomArg)
+  }
+  private def gcd(a: Int, b: Int): Int = 
+    if ( b == 0 ) a else gcd(b, a % b)
+}
+```
+* 테스트
+```
+val x = 2
+new LazyRationalTrait {
+  val numerArg = 1 * x 
+  val denomArg = 2 * x
+}
+```
+
+1. LazyRationalTrait 인스턴스를 만든다. 그리고 LazyRationalTrait의 초기화 코드 실행
+2. 새 표현식에서 정의한 익명 서브 클래스의 주 생성자를 실행. 이 과정에서 numerArg는 2 denomArg 는 4로 초기화
+3. toString 호출
+4. toString은 numer 필드에 최초 접근
+5. numer 초기화 표현식 계산한다.
+6. numer 계산식은 g 필드에 접근해서 g 계산 
+7. 이 계산 중에 numerArg, denomArg 접근
+8. 이제 denom 필드어 최초 접근 denom에 대한 초기 표현식 계산. denomArg, g에 접근한다. g는 계산한 값 재사용한다.
+9.  결과물 1/2 를 출력한다.
+
+
+
 ## 공부하기 좋은 자료들
 * [Scala school](https://twitter.github.io/scala_school/ko/basics.html)
 * [Effective scala](http://twitter.github.io/effectivescala/)
