@@ -1379,7 +1379,159 @@ List(1+2+3+0, 2+3+0, 3+0, 0) // 이 표현과 동등
       (r, Stream.cons(r, b2._2))
     })._2
 ```
+## 6. 순수 함수적 상태
 
+* 상태를 다루는 순수 함수적 프로그래밍을 다룬다.
+* 예) 난수 발생
+* `scala.util.Random`클래스를 사용한다.
+
+```
+
+scala> val rng = new scala.util.Random
+scala> rng.nextDouble
+
+res0: Double = 0.8277158914379049
+
+scala> rng.nextInt(10)
+res1: Int = 5
+
+```
+
++ rng의 메소드는 내부적으로 상태를 갖는다. 
+   - 상태가 없다면 똑같은 값이 리턴된다.
++ 테스트성에 맞춰서 RNG를 보자. 
+   - 매번 상태가 파괴된다. 즉 재현이 안된다.
+   - 인수로 RNG를 전달 하는 것도 방법이지만, 내외부 상태 추적을 해야한다.
+   - random이 내부에서 몇번 호출되었는가 정보도 필요하다.
+   ```
+   def rollDie(rng: scala.util.Random): Int = rng.nextInt(6)
+   ```
+   - side-effect 제거가 가장 좋은 해결책이다.
+
+###  순수 함수적 난수 발생
+* 참조 투명성을 보장하려면 상태 갱신을 명시적으로 드러내자.
+```
+trait RNG {
+  def nextInt: (Int, RNG)
+}
+```
+* `nextInt`는 발생한 난수만 돌려주고, 내부 상태는 제자리 변이를 통해서 갱신한다.
+* 그리고 이 트레잇은 난수와 새 상태를 돌려주며 기존 상태는 유지한다.
+* 다음 상태를 계산하는 관심사와 새 상태를 프로그램에 알려주는 관심사를 분리한다.
+* 다음은 이 구현 예제다
+```
+case class SimpleRNG(seed: Long) extends RNG {
+ def nextInt: (Int, RNG) = {
+   val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFFFL
+   val nextRNG = SimpleRNG(newSeed)
+   val n = (newSeed >>> 16).toInt
+   (n, nextRNG)
+ }
+}
+// 실행 결과
+scala> val rng = SimpleRNG(42)
+rng: SimpleRNG = SimpleRNG(42)
+
+scala> val (n1, rng2) = rng.nextInt
+n1: Int = 16159453
+rng2: RNG = SimpleRNG(1059025964525)
+
+scala> val (n2, rng3) = rng2.nextInt
+n2: Int = -1281479697
+rng3: RNG = SimpleRNG(62684936753093620)
+```
+* rng를 호출하면 늘 같은 결과가 나온다. 즉, 이 함수는 순수하다. 
+
+### 상태 있는 API를 순수하게 만들기
++ 동일하게 이런  패턴을 이용하면 순수하게 만들 수 있다.
++ 이 패턴은 계산한 다음상태를 전달하는 것을 호출자에게 맡긴다.
++ 순수함수를 이용해서 다음 상태를 갱신하면 효율성 손실이 발생할 수 있다.
+  - 바로 제자리 갱신이 안되고 복사를 한뒤 갱신하므로..
+  
+* 예
+
+```
+class Foo {
+  private var s: FooState=  ... 
+  def bar: Bar
+  def baz: Int
+}
+```
+위의 예제를 아래처럼 순수 함수형태로 바꾸는게 가능하다
+
+```
+trait Foo {
+  def bar: (Bar, Foo)
+  def baz: (Int, Foo)
+}
+```
+
+### 문제풀이 6.1
+RNG.nextInt를 이용해서 0이상 `Int.MaxValue` 이하의 난 수 정수를 생성하는 함수를 작성하라. 
+`def nonNegativeInt(rng: RNG): (Int, RNG)`
+#### 풀이
+* `-` 처리를 하면 역수를 구할 수 있다. Int는 음수의 경우 양수보다 범위 커버가 크므로 +1 을 해준다.
+```
+  def nonNegativeInt(rng: RNG): (Int, RNG) = {
+    val (i, r) = rng.nextInt
+    (if (i < 0) -(i + 1) else i, r)
+  }
+```
+### 문제풀이 6.2
+0이상 1 미만의 double 난수를 발생하는 메소드를 만들어라
+
+#### 풀이
+* 랜덤값이 Int.MaxValue가 나올 수 있다. 그럼 랜덤값 나누기 int 최대값을 해보면 1이 나온다 그래서 분모에 +1을 해서 이를 방지한다.
+```
+  def double(rng: RNG): (Double, RNG) = {
+    val (i, r) = nonNegativeInt(rng)
+    (i.toDouble / Int.MaxValue.toDouble + 1, r)
+  }
+```
+
+### 문제풀이 6.3
+각 난수쌍을 만드는 함수를 작성하라, 가능하면 만든 메소드를 재사용해라
+```
+ def intDouble(rng: RNG): ((Int, Double), RNG)
+ def doubleInt(rng: RNG): ((Double, Int), RNG)
+ def double3(rng: RNG): ((Double, Double, Double), RNG)
+```
+#### 풀이
+```
+  def intDouble(rng: RNG): ((Int, Double), RNG) = {
+    val (i, rng2) = rng.nextInt
+    val (d, rng3) = double(rng)
+    ((i, d), rng3)
+  }
+
+  def doubleInt(rng: RNG): ((Double, Int), RNG) = {
+    val ((i, d), rng2) = intDouble(rng)
+    ((d, i), rng2)
+  }
+
+  def double3(rng: RNG): ((Double, Double, Double), RNG) = {
+    val (d1, r1) = double(rng)
+    val (d2, r2) = double(r1)
+    val (d3, r3) = double(r2)
+    ((d1, d2, d3), r3)
+  }
+```
+
+### 문제풀이 6.4
+정수 난수 목록을 만드는 함수를 만들어라
+#### 풀이
+```
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
+    @tailrec
+    def gen(n: Int, r: RNG, l: List[Int]): (List[Int], RNG) =
+      if (n == 0) (l, r)
+      else {
+        val (i, nr) = r.nextInt
+        gen(n - 1, nr, i :: l)
+      }
+    gen(count, rng, List())
+  }
+```
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
