@@ -1532,6 +1532,130 @@ RNG.nextInt를 이용해서 0이상 `Int.MaxValue` 이하의 난 수 정수를 �
     gen(count, rng, List())
   }
 ```
+
+### 6.4 상태 동작을 위한 API 개선
+앞의 함수를 살펴보자.
+매번 RNG => (A, RNG) 형식을 공통적으로 사용한다.
+이 말은 RNG를 새 RNG 상태로 변환한다는 것이다. 
+이런 함수를 상태 동작(stat action) 이나 상태전이(state transition)이라 부른다.
+이런 함수는 combinator를로 조합할 수 있다. 
+
+우선 상태 동작 data type의 alias 를 만들자. 
+`type Rand[+A] = RNG => (A, RNG)` 
+
+이걸 만드는 이유는 호출자가 매번 상태를 전달하는 반복적이고 지루한 작업이기 때문이다. 그래서 조합기가 자동으로 넘겨주도록 한다.
+
+
+```
+  val int: Rand[Int] = _.nextInt
+```
++ `Rand[Int]` 값은 
+  - 한 상태동작에 의존한다
+  - 이 상태를 이용 A를 생성. 
+  - 새로운 상태로 전이 한다.
+
++ 이렇게 combinator를 만들다보면 모든 전달을 자동으로 처리하는 DSL을 만들 수 있다.
+
+
+예로 RNG를 사용하지 않고 그대로 전달하는 unit 동작이다. 
+```
+  def unit[A](a: A): Rand[A] = rng => (a, rng)
+```
+
+그리고 한 상태 동작의 출력을 변환하지만 상태는 수정하지 않는 map도 생각할 수 있다.
+
+```
+def map[A,B](s: Rand[A])(f: A => B): Rand[B] =
+  rng => {
+    val (a, rng2) = s(rng)
+    (f(a), rng2)
+  }
+```
+
+위의 내용을 응용해서 0보다 크고 2로 나누어 떨어지는 Int 발생 함수를 만들 수 있다.
+```
+ def nonNegativeEven: Rand[Int] = map(nonNegativeInt)(i => i - i % 2)
+```
+
+#### 6.5 연습문제 
+6.2의 double을 map을 사용해서 우아하게 풀어봐라.
+##### 풀이 
+```
+  def doubleViaMap: Rand[Double] = 
+    map(nonNegativeInt)(i => i.toDouble / (Int.MaxValue.toDouble + 1))
+```
+
+#### 상태 동작들의 조합
+
+* 위에 다룬 예제는 intDouble, DoubleInt를 다룰정도로 강력하진 않다 RNG를 이항함수로 조합하는 새로운 map2가 필요하다.
+
+#### 6.6 연습문제 
+* 두 상태동작 ra, rb와 이들의 결과를 조합하는 함수 f 를 받고 두 동작을 조합한 새동작을 돌려준다.
+```
+def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C]
+```
+##### 풀이
+* return 값은 (RNG => (A, RNG))이다.
+* rng값은 공통이므로 계속 하나씩 하나씩 상태 전이를 하면 된다.
+```
+  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    rng => {
+      val (a, rng2) = ra(rng)
+      val (b, rng3) = rb(rng2)
+      (f(a, b), rng3)
+    }
+```
+
+* 위 map2를 이용하면 임의의 RNG 상태 동작을 조합할 수 있다.
+
+```
+def both[A,B](ra: Rand[A], rb: Rand[B]): Rand[(A,B)] =
+  map2(ra, rb)((_, _))
+```
+
+intDouble과 dobuleInt를 손쉽게 구현할 수 있다.
+
+```
+val randIntDouble: Rand[(Int, Double)] = both(int, double)
+val randDoubleInt: Rand[(Double, Int)] = both(double, int)
+
+```
+
+#### 6.7 연습문제 
+* 상태전이 목록 전체를 조합하는게 가능해야한다. sequence를 구현해라
+그리고 이 함수를 이용해서 ints를 다시 구현하라.
+ints함수 구현에서 x가 n번 되풀이되는 목록을 만들려면 List.fill(n)(x)를 사용해라 
+```
+def sequence[A](fs: List[Rand[A]]): Rand[List[A]]
+```
+##### 풀이
+* 처음 풀이는 map2 풀이를 참고해서 풀었다.
+* 상태 정보가 들어나게 되므로 그다지 좋은 풀이는 아니다.
+* 두번째는 List의 foldRight를 이용해서 풀었다.
+```
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = {
+    rng =>
+      {
+        @tailrec
+        def go(l: List[Rand[A]], r: RNG, rt: List[A]): (List[A], RNG) =
+          l match {
+            case h :: t => {
+              val (s, nr) = h(rng)
+              go(t, nr, s :: rt)
+            }
+            case Nil => (rt, r)
+          }
+        go(fs, rng, List())
+      }
+  def sequence2[A](fs: List[Rand[A]]): Rand[List[A]] =
+    fs.foldRight(unit(List[A]()))((f, acc) => map2(f, acc)(_ :: _))
+
+  def intsViaSequence(count: Int): Rand[List[Int]] =
+    sequence2(List.fill(count)(int))
+```
+
+
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
