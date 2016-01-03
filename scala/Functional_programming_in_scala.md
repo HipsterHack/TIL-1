@@ -1655,6 +1655,161 @@ def sequence[A](fs: List[Rand[A]]): Rand[List[A]]
 ```
 
 
+#### 내포된 상태 동작 
+
+RNG를 명시적으로 언급하거나 전달하지 않아도 구현이 가능하다.
+map과 map2로 작성이 어려운 것도 있다.
+
+예제는 0이상 n미만 난수 발생 함수다 .
+
+```
+def nonNegativeLessThan(n: Int): Rand[Int]
+= map(nonNegativeInt) { _ % n }
+```
+위처럼 구현하면 요구 범위 난ㅅ구가 만들어지지만, `Int.MaxValue`가 n으로 나누어 떨어지지 않을 수도 있다.
+그래서 전체적으로 난수가 치우친다. 나머지보다 작은 수들이 자주 나타난다는 것이다. 
+아래는 개선한 풀이다.
+
+```
+def nonNegativeLessThan(n: Int): Rand[Int] = 
+  map(nonNegativeInt) { i => 
+    val mod = i % n 
+    if ( i + (n - 1) - mod >= 0 ) mod else nonNegativeLessThan(n)(???)
+  }
+```
+* 위 구현은 nonNegativeLessThan(n) 형식이 자리가 맞지 않는다. 이 함수는 Rand[Int]를 리턴해야하고 RNG 하나를 인수로 받아야 한다.
+* 그래서 map을 사용하지 않고 명시적으로 전달하는 방법이다.
+
+```
+def nonNegativeLessThan(n:Int): Rand[Int] = {
+ rng => 
+    val (i, rng2) = nonNegativeInt(rng)
+    val mod = i % n 
+    if (i + (n - 1) - mod >= 0 )
+      (mod, rng2)
+    else nonNegativeLessThan(n)(rng2)  
+
+}
+```
+
+map 말고 이런 전달을 처리 해주는 조합기가 있으면 좋을 것이다.
+
+
+#### 6.8 연습문제
+* flatMap을 구현하고 이를 이용해서 nonNegativeLessThan을 구현해라
+```
+def flatMap[A, B](f: Rand[A])(g: A => Rand[B]): Rand[B]
+```
+
+##### 풀이
+```
+  def flatMap[A, B](f: Rand[A])(g: A => Rand[B]): Rand[B] =
+    rng => {
+      val (a, nr) = f(rng)
+      g(a)(nr)
+    }
+
+  def nonNegativeLessThan(n: Int): Rand[Int] =
+    flatMap(nonNegativeInt) { i =>
+      val mod = i % n
+      if (i + (n - 1) - mod >= 0) unit(mod) else nonNegativeLessThan(n)
+    }
+```
+
+#### 6.9 연습문제
+* flatMap을 이용해 map, map2를 구현해라
+
+##### 풀이
+
+```
+  def mapViaFlatMap[A, B](s: Rand[A])(f: A => B): Rand[B] =
+    flatMap(s)(a => unit(f(a)))
+
+  def map2ViaFlatMap[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    flatMap(ra)(a => {
+      flatMap(rb)(b => {
+        unit(f(a, b))
+      })
+    })
+```
+
+* nonNegativeLessThan을 이용해서 rollDie를 구현해보자.
+
+```
+def roleDie: Rand[Int] = nonNegativeLessThan(6)
+```
+* 여전히 하나 모자라는 오류가 있다. 이 함수를 RNG 상태로 검사하면 함수 반환값이 0이 되는 RNG를 발견할 수 있다.
+* 0이 나오는 경우는 아래처럼 수정하면 된다.
+
+```
+def roleDie: map(nonNegativeLessThan(6))(_ + 1)
+```
+
+### 6.5 일반적 상태 동작 자료 형식 
+
+* unit, map, map2, flatMap, sequence은 범용함수다.
+예를 들어 map은 RNG 상태 동작을 다루는지 상관않는다. 
+그래서 아래처럼 일반적인 서명을 사용할 수 있다. 
+```
+def map[S, A, B](a: S => (A, S))(f: A => B): S => (B, S)
+```
+* 이렇게 서명을 바꿔도 map 구현은 수정할 필요가 없다. 
+* 이제 좀더 범용적인 상태를 처리할 수 있는 형식을 생각해보자
+
+```
+type State[S, +A] = S => (A, S)
+```
+* 이 State는 상태 동작 상태 전이를 대표한다. statement를 대표한다고 볼수도 있다.
+* 아래와 같은 case class 형식으로 만들 수도 있다. 
+```
+case class State[S, +A](run: S => (A, S))
+```
+위에 State를 이용해 Rand를 Alias로 만들 수 있다.
+
+```
+type Rand[A] = State[RNG, A]
+```
+
+#### 6.10 연습문제
+* unit, map, map2, flatMap, sequence를 일반화하라. 가능하면 State case class 에 넣고 불가능하면 State Companion 객체에 넣자.
+
+##### 풀이
+* State case class에 있는 경우는 A에 대한 고려를 할 필요가 없다.( 같은 객체이기 대문에)
+* sequence는 foldRight, foldLeft로 구현 할 수 있다. (foldLeft가 더 빠르다.)
+```
+case class State[S, +A](run: S => (A, S)) {
+  // 6.10
+  def flatMap[B](f: A => State[S, B]): State[S, B] =
+    State(
+      s => {
+        val (a, s1) = run(s)
+        f(a).run(s1)
+      })
+  def map[B](f: A => B): State[S, B] =
+    flatMap(a => State.unit(f(a)))
+
+  def map2[B, C](sb: State[S, B])(f: (A, B) => C): State[S, C] =
+    flatMap(a => sb.map { b => f(a, b) })
+
+}
+
+object State {
+  def unit[S, A](a: A): State[S, A] = State { (st: S) => (a, st) }
+
+  def sequence[S, A](fs: List[State[S, A]]): State[S, List[A]] = {
+    def go(s: S, l: List[State[S, A]], acc: List[A]): (List[A], S) = {
+      l match {
+        case Nil => (acc, s)
+        case h :: t => h.run(s) match {
+          case (a, s1) => go(s1, t, a :: acc)
+        }
+      }
+    }
+    State((s: S) => go(s, fs, List()))
+  }
+}
+```
+
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
