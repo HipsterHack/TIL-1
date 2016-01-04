@@ -1809,7 +1809,91 @@ object State {
   }
 }
 ```
+### 6.6 순수 함수적 명령식 프로그래밍
+* 위에 작성해본 예제에서 상태동작을 실행하고 결과를 val에 배정한다.
+* 또 그 val을 사용하는 다른 상태 동작을 실행하고 그 걸 다시 val에 배정하는 방식을 사용했다. 
+* 명령식 프로그래밍과 비슷하다. 
+* 하지만 실제는 상태동작 State이고, 이건 함수다. 인수를 받으면서 현재 프로그램 상태를 읽고, 
+그냥 값을 돌려줌으로 써 프로그램 상태를 수정한다. 
+* 위의 구현한 형태를 보면 명령식 프로그램 성격은 많이 사라졌다.
 
+예) 
+
+```
+val ns: Rand[List[Int]] = 
+  int.flatMap (x => 
+    int.flatMap( y => 
+      ints(x).map(xs => 
+        xs.map(_ % y)
+      )
+    )
+  )
+```
+
+위 코드는 이해 하기 어렵다. map과 flatMap이 연달아 나오면 쓸 수 있는 for-comprehension 을 이용해서 명령식 스타일로 만들 수 있다.
+
+```
+val ns: Rand[List[Int]] = for {
+	x <- int
+	y <- int
+	xs <- ints(x)	
+} yield xs.map(_ % y )
+```
+
+
+for-comprehension 을 이용하는 프로그래밍 방식 이용하려면 기본적은 State combinator 2개다.
+현재 상태를 얻는 get, 새 상태를 설정하는 set이다. 공통 코드를 만들어보자
+
+```
+def modify[S](f: S => S): State[S, Unit] = for { 
+  s <- get
+  _ <- set(f(s))
+} yield ()
+
+def get[S] : State[S, S] = State(s => (s, s))
+def set[S](s: S): State[S, Unit] = State(_ => ((), s))
+```
+
+이 두 간단한 동작과 이전에 작성한 combinator가 있으면 어떤 종류의 상태 기계나 상태가 있는 프로그램도 순수 함수적 방식으로 구현이 가능하다.
+
+#### 6.11 연습문제
+* 사탕 판매기 예제를 풀어라.
+이 판매기에는 두가지 종류의 입력이 있다. 하나는 동전이고 또 하나는 상탕이 나오는 손잡이 이다. 
+```
+sealed trait Input
+case object Coin extends Input
+case object Turn extends Input
+
+case class Machine(locked: Boolean, candies: Int, coins: Int)
+```
+* 사탕 판매기의 작동 규칙은 다음과 같다. 
+
++ 잠겨진 판매기에 동전을 넣으면 사탕이 남아 있는 경우 잠김이 풀린다.
++ 풀린 판매기의 손잡이를 돌리면 사탕이 나오고 판매기가 잠긴다.
++ 잠긴 판매기의 손잡이를 돌리거나 풀린 판매기에 동전을 넣으면 아무일도 생기지 않는다 
++ 사탕이 없는 판매기는 모든 입력을 무시한다.
+
+* `simulateMachine` 메소드는 입력에 기초해서 판매기를 작동하고 작동이 끝난뒤에 판매기에 있는 동전 개수와 사탕 개수를 돌려줘야 한다.
+예를 들어 동전이 10개 사탕이 5개 있는 Machine에 총 4개의 사탕이 성공적으로 팔렷다면 출력은 (14, 1)이어야 한다.
+
+##### 풀이
+
+```
+
+sealed trait Input
+
+case object Coin extends Input
+case object Turn extends Input
+
+case class Machine(locked: Boolean, candies: Int, coins: Int)
+
+```
+
+### 요약
++  전반적인 패턴은 다음과 같다.
+  - 상태를 인수로 받는다.
+  - 새 상태를 결과와 함께 돌려주는 순수 함수 사용 
++ 부수 효과에 의존하는 API를 만나면 리팩토링 해봐라.
 
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
