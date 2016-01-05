@@ -1895,6 +1895,106 @@ case class Machine(locked: Boolean, candies: Int, coins: Int)
   - 새 상태를 결과와 함께 돌려주는 순수 함수 사용 
 + 부수 효과에 의존하는 API를 만나면 리팩토링 해봐라.
 
+
+## 7. 순수 함수적 병렬성
+
+* 계산의 서술과 실행을 분리한다.
+* parMap combinator를 구현한다. 
+ - 함수 f를 모든 컬렉션 요소에 적용할 수 있다.
+ ```
+ 	val outputList = parMap(inputList)(f)
+ ```
+* 라이브러리가 처리하고자 하는 용례를 만든다.
+* 점점 복잡한 용례를 거치면서 도메인과 설계 공간 이해도를 높인다.
+* 대수적 추론에 역점을 두고 API를 특정 법칙에 따르는 대수로 서술할 수 있다.
+* 관례가 실용적이진 않다. 
+* 라이브러리를 만들려면 기존 설계의 근본 가정을 고찰한뒤 다른 경로를 택하고, 문제 공간에서 다른 사람이 고찰하지 못한 것을 발견할 수 있다.
+* 근본적으로 라이브러리가 side effect를 허용하지 않는 것이다.
+
+### 7.1 자료형식과 함수의 선택
+* "병렬 계산을 생성할 수 있어야 한다" 
+  - 이 착안을 구현가능한 걸로 상세화 해보자.
+  ```
+  	def sum(ints: Seq[Int]): Int = 
+  	  ints.foldLeft(0)((a, b) => a + b)
+  ```
+  - foldLeft는 표준 라입인 Seq에 있다.
+  - 이 방법 말고 분할 정복 방법을 써보자
+  ```
+   def sum(ints: IndexedSeq[Int]): Int = 
+     if (ints.size <= 1)
+       ints.headOption getOrElse 0
+     else {
+       val (l, r ) = ints.splitAt(ints.length /  2)
+       sum(l) + sum(r)
+     }
+  ```
+  - 이 코드는 순차열 splitAt으로 두개로 분할해서 재귀적으로 부분합을 구한다.
+  - 이 구현은 병렬화 할 수 있다. 두 절반을 병렬로 합할 수 있다.
+  - 이 계산을 병렬화 하려면 어떤 종류의 자료형식과 함수가 필요할지 고민해보자
+    - 이러면 이전 관점과 다른 관점으로 본다
+    - 간단한 예제로부터 영감을 얻어서 이상적인 API 를 직접 설계 구현하는 방식을 선호한다.
+
+#### 7.1.1 병렬 계산을 위한 자료형식 하나 
+* `sum(l) + sum(r)`은 병렬 계산 자료 형식이 1개의 결과를 담아야 한다는걸 알 수 있다.
+* 그 결과는 어떤 의미 있는 형식이어야 하며
+* 추출함수도 필요하다.
+* 지금 결과를 담을 컨테이너 형식을 창안하자(Par[A])
+
+* `def unit[A](a => A): Par[A]` : 평가되지 않은 A를 받고 이걸 개별적은 쓰레드로에서 평가할 수 있는 계산을 돌려준다. unit인 이유는 쓰레드 한개가 이걸 감쌀 수 있다는 점이다.
+* `def get[A](a: Par[A]): A` : 병렬 계산에서 결과값을 추출한다.
+
+* 우선은 예제를 통해서 자료형식과 함수만 뽑아내자.
+
+```
+def sum(ints: IndexdedSeq[Int]): Int = 
+  if (ints.size <=  1)
+    ints headOption getOrElse 0
+  else 
+    val (l,r) = ints.splitAt(ints.length / 2)
+    val sumL : Par[Int] = Par.unit(sum(l))
+    val sumR : Par[Int] = Par.unit(sum(r))
+    Par.get(sumL) + Par.get(sumR)
+```
+* 이제 unit, get의 의미를 선택하자.
+* unit은 주어진 인수를 개별적인 쓰레드로 즉시 평가 or get 호출시 평가. 
+ - 하지만 병렬 잇점을 취하려면 동시에 평가 시작후 즉시 반환해야 한다.
+ - 스칼라는 왼쪽에서 오른쪽으로 엄격하게 평가한다. 즉 unit이 get이 호출될때까지 기다리면 첫번째 병렬 계산이 끝나야 다음 병렬 계산을 시작할 수 있다. 
+* ` Par.unit(sum(l)) + Par.unit(sum(r))`은 unit을 즉시 평가하면 get 평가 완료를 기다린다
+  + get은 unit 한정 부수 효과가 존재한다.
+
+##### 다음의 과정을 거쳤다.
+1. 간단한 예제 작성
+2. 예제를 살피고 설계상의 선택 문제를 찾아냈다
+3. 몇가지 실험을 통해서 특정 선택 사항의 흥미로운 결과를 발견했다.
+
+#### 7.1.2 병렬 계산의 조합 
+
+앞에서 말한 unit과 get의 조합을 어떻게피할까?
+
+```
+def sum(ints: IndexedSeq[Int]): Par[Int] = 
+  if (ints.size <= 1)
+    Par.unit(ints.headOption getOrElse 0 )
+  else {
+ 	val (l,r) = ints.splitAt(ints.length / 2)
+ 	Par.map2(sum(l), sum(r))(_ + _)
+
+  }
+```
+#### 연습문제 7.1
+* Par.map2는 두 병렬 계산의 결과를 결합하는 고차 함수이다. 이 함수의 서명은 무엇일까?
+일반적으로 작성해보라
+
+```
+def map2[A, B, C](a:Par[A], b: Par[B])(z: (A, B) => C): Par[C]
+```
+
+* 이제는 재귀에서 unit을 호출하지 않는 점을 주목하자. 이제는 unit 인수가 게으른 인수 여야 하는지 명확하지 않다. 
+* map2는 계산에 동등한 기회를 주어 병렬로 실행될 수 있게 해야한다.
+* 아래 평가의 TC를 보자
+
+
 ## 참고 자료 
 * [스칼라 기본 타입](https://twitter.github.io/scala_school/ko/type-basics.html)
 * [FP in Scala 답](https://github.com/fpinscala/fpinscala)
