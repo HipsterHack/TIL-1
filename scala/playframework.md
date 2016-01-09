@@ -397,3 +397,143 @@ def index = Action { implicit request =>
 ```
 
 
+#  Play 템플릿 사용법
+
+## play 템플릿은  Twirl 엔진을 사용한다.
+
+play 스칼라 템플릿은 작은 scala 코드이다.
+`views/Application/index.scala.html` 파일이면 코드에서는 `views.html.Application.index` 클래스로 만들어진다.
+
+아래는 예제이다.
+
+```
+@(customer: Customer, orders: List[Order])
+
+<h1>Welcome @customer.name!</h1>
+
+<ul>
+@for(order <- orders) {
+  <li>@order.title</li>
+}
+</ul>
+```
+
+위에걸 코드에서 사용하고 싶다면
+```
+val content = views.html.Application.index(c, o)
+```
+
+## `@` 문자
+
+`@`는 템플릿용 문자다. 이 문자를 prefix로 해서  분기, 반복, 값 할당 등을 한다.
+
+```
+Hello @customer.name!
+```
+
+```
+Hello @(customer.firstName + customer.lastName)!
+```
+
+```
+Hello @{val name = customer.firstName + customer.lastName; name}!
+```
+ escape는 `@@`으로 쓰면 된다
+```
+My email is bob@@example.com
+```
+
+## 템플릿 파라미터 
+
+함수처럼 사용한다. 파라미터가 필요하면 템플릿 가장 위에 선언하자.
+```
+@(customer: Customer, orders: List[Order])
+// 기본값 사용
+@(title: String = "Home")
+
+// 여러개 
+@(title: String)(body: Html)
+```
+
+## 반복 
+`for`키워드를 사용하면 loop를 사용 할 수 있다.
+```
+<ul>
+@for(p <- products) {
+  <li>@p.name ($@p.price)</li>
+}
+</ul>
+```
+
+## if 
+
+```
+@if(items.isEmpty) {
+  <h1>Nothing to display</h1>
+} else {
+  <h1>@items.size items!</h1>
+}
+```
+## 재사용 block
+
+```
+@display(product: Product) = {
+  @product.name ($@product.price)
+}
+
+<ul>
+@for(product <- products) {
+  @display(product)
+}
+</ul>
+```
+* 메소드 형태로 묶을 수 있지만 복잡한 로직을 넣는 것은 아니다.
+
+## defining 문법
+
+* 재사용 값을 선언하는 방법이다. `defining`을 사용한다.
+
+```
+@defining(user.firstName + " " + user.lastName) { fullName =>
+  <div>Hello @fullName</div>
+}
+```
+
+
+## import 문장
+
+`@import` 로 템플릿으로 가져올 수 있다.
+
+```
+@(customer: Customer, orders: List[Order])
+
+@import utils._
+
+...
+```
+
+`_root_` prefix를 사용해서 절대 경로로 가져올 수 있다.
+```
+@import _root_.company.product.core._
+```
+
+## 주석
+
+주석은 다음과 같이 쓸수 있다
+```
+ @* *@
+```
+
+## String 외삽(interpolation)
+
+* String에서 value 값을 대체해서 넣으려면 `$`를 사용한다.
+```
+import play.twirl.api.StringInterpolation
+
+val name = "Martin"
+val p = html"<p>Hello $name</p>"
+```
+
+## 참고
+
+(https://playframework.com/documentation/2.4.x/ScalaTemplates)
