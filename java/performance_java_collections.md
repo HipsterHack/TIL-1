@@ -3,6 +3,7 @@
 아래는 자바 collection API의 성능표이다.
 
 * List 와 Set
+
 |Structure|get|add|remove|contains|
 |---------|---|---|------|--------|
 |ArrayList|O(1)|O(1)|O(n)|O(n)|
@@ -13,11 +14,13 @@
 
 
 * Maps
+
 |Structure|get|add|remove|contains|
 |---------|---|---|------|--------|
 |HashMap|O(1)|O(1)|O(1)|O(1)|
 |LinkedHashMap|O(1)|O(1)|O(1)|O(1)|
 |TreeMap|O(log n)|O(log n)|O(log n)|O(log n)|
+
 
 
 ## 참고
