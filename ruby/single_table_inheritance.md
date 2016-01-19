@@ -62,6 +62,16 @@ end
 <%= form_for(@item, as: :item, url: url, method: method, :html => {:multipart => true, class: "form-horizontal item_form" } ) do |f| %>
 ```
 
+## STI 모델 subclass가 없어도 오류를 발생 않아야 하는 경우
+* 서브 클래스가 삭제 이름 변경의 가능성 있거나 서브 클래스가 사라져도 데이터는 출력해야 하는 경우가 있다.
+* 내 경우는 관리툴에서 발생했다. 이 데이터를 관리 해야 하는 경우, 서브 클래스가 없어도 데이터는 출력해야 했다.
+* 해결책은 간단했다. 같은 테이블을 바라보는 model만 하나 더 추가한다. 그리고 관리툴에선 이 model을 사용하면 된다.
+```
+class Model < ActiveRecord:Base
+  self.table_name = "items"
+end
+```
+* 이러면 subclass exception의공포 없이 문제를 해결할 수 있다.
 
 ## 참고 
 
