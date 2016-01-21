@@ -26,6 +26,11 @@ head 태그에 link를 추가한다.
 <link rel="next" href="http://www.example.com/article?story=abc&page=4" /
 ```
 
+## HTTPS사용
+
+## 표준 URL 이 아니면 응답값을 301 로 처리
+
 # 참고
 [https://googlewebmastercentral.blogspot.kr/2011/09/pagination-with-relnext-and-relprev.html] 
 [https://googlewebmastercentral.blogspot.kr/2009/02/specify-your-canonical.html] 
+한글버전 SEO 최적화 [https://support.google.com/webmasters/answer/139066?hl=ko]
