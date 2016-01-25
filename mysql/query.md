@@ -47,5 +47,37 @@ ON DUPLICATE KEY UPDATE name = 'kang', depart_id = 10, salary_amount = 20
    	updated_at = now()   
 ```
 
+## UPDATE where 에서 자기 테이블 서브쿼리 방법
+
+* 조건절에서 조건 컬럼을 업데이트 대상 테이블로 본다. 그래서 그냥 서브쿼리는 수행할 수 없다.
+
+```
+UPDATE
+  users
+SET state = 'perferences_input'
+WHERE id IN (
+   SELECT u.id  FROM users WHERE state IS NULL
+)
+```
+
+* 한번 더 감싸서 VIEW로 만들어야 업데이트 가능하다.
+
+```
+UPDATE
+  users us
+SET us.state = 'perferences_input'
+WHERE us.id IN (
+   SELECT target.id 
+   FROM (
+   	 SELECT u.id  
+   	 FROM users 
+   	 WHERE state IS NULL
+   ) target
+)
+```
+
+
+
 ### 참고 
-* [http://dev.mysql.com/doc/refman/5.1/en/insert-on-duplicate.html] 
+* http://dev.mysql.com/doc/refman/5.1/en/insert-on-duplicate.html 공식문서 
+* http://c.tistory.com/163 UPDATE에 서브쿼리
