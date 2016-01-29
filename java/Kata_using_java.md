@@ -52,3 +52,15 @@ public class Circle {
   }
 }
 ```
+
+# 카타3
+* Functional Programming 익히기
+* 
+```
+import java.util.function.Function;
+
+public class FunctionalProgramming {
+  public static Function<Student, Boolean> f = p -> "John Smith".equals(p.getFullName()) && "js123".equals(p.studentNumber);
+
+}
+```
