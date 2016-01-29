@@ -1,5 +1,6 @@
 # Kata using Java
 
+# 카타1
 * 엑셀 컬럼을 숫자로 나타내는 메소드를 만들어라.
 * "A" 는 1, "AA"는 27.. 이런 형태로 만들면 된다.
 * 아래는 구현코드
@@ -35,5 +36,19 @@ public class TitleToNumber {
     private static int distanceFromA(char ch){
       return Character.getNumericValue(ch) - Character.getNumericValue('A') + 1;
     }
+}
+```
+
+# 카타2
+* 원의 넓이를 구하여라.
+
+```
+public class Circle {
+  public static double area(double radius) {
+    if ( radius <= 0.0D )
+      throw new IllegalArgumentException();
+      
+    return Math.PI * Math.pow(radius, 2);
+  }
 }
 ```
