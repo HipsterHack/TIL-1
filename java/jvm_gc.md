@@ -13,13 +13,19 @@
 * 힙의 일부
 * 메모리가 최초에 할당되는 곳. GC 이후에 survivor 영역으로 이동하다가 공간이 없으면 old Generation으로 promotion한다.
 * Minor GC가 이곳에서 일어난다.
+
 #### Eden
+
 * 객체를 만들면 최초로 할당되는 곳.
+
 #### Survivor 
+
 * GC를 거치면서 참조가 있어 살아남는 객체가 있는 곳. 
 * 참조가 있는 객체만 survivor 영역을 왔다 갔다하면서 한곳이 비워지는 시스템이다.
 * 일정이상 GC에서 살아남으면 Old Gen으로 인정받는다.
+
 ### Old Generation
+
 * `-XX:MaxTenuringThreshold=15`의 minor GC를 견디고 살아남은 객체가 promotion해서 가는 영역. 
 * Major GC에서 삭제가 가능했다.
 
@@ -27,6 +33,7 @@
 * OldGen으로부터 YoungGen으로 참조가 생기면 Young Gen의 참조 정보를 가지는 테이블.
 
 ### permanent Generation
+
 * Class 메타정보
 * Method 메타정보
 * Static Object
