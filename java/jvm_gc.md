@@ -152,3 +152,8 @@
 
 * 특징은 Single-threaded, Stop-the-world 이때 permanent area cleanup도 실행 (즉, classloader unloading은 이때 일어남)
    + 참고 : G1GC에서 class unloading 관련한 이슈가 있다. Hot Deploy를 많이 할 경우 JDK 7 G1 GC에서는 perm generation 문제가 발생할 수 있다
+   
+
+# 참고
+
+* G1: http://logonjava.blogspot.kr/2015/08/java-g1-gc-full-gc.html
