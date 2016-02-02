@@ -137,9 +137,12 @@
 4. Remark: 
   + Stop the world.
   + Heap내의 live 객체에 마킹을 완료하는 단계. 
+  + 빈 region들은 삭제해서 free로 만든다.
+  + 전체 region들의 live object 비율이 계산된다.
   + G1은 SATB(Snapshot-At-The-Beginning) 알고리즘을 사용
 5. Clean up  
-   + Remembered Set을 정리 (Stop the world), 
+   + Stop the world
+   + Remembered Set을 정리 
    + Empty Region을 재정리(조각모음) 하여 이 Region을 Free List에 추가(Concurrent)
 6. copy 
    + 선택된 region들의 compaction이 완료된 시점. 
