@@ -129,6 +129,8 @@
   + 다중쓰레드로 동작하며 애플리케이션과 concurrent하게 동작
 3. Concurrent Mark: 
   + 다중쓰레드로 동작, reachable, live 객체를 마킹한다. 
+  + 빈 region들을 찾아 표기하고 region별 live object 비율을 계산해둔다.
+  + 이 region들은 바로 다음 Remark 단계에서 제거
   + Young GC와 동시에 실행
 4. Remark: 
   + Stop the world.
