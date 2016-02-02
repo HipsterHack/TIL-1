@@ -101,8 +101,9 @@
 * 튜닝을 해도 효과가 잘 없다.
 * region 타입은 Eden, Survivor, Old, humougous(큰 크기의 영역), unused가 있다.
 * 사용자가 지정한 PauseTime(기본값 200ms)안에 GC를 끝내려고 노력한다.
-* 
+
 ##### Minor GC(Evacuation Phase)
+
 * Stop the world가 발생, 다중쓰레드로 동작한다.
 * Eden, Survivor region 크기가 변경될 수 있다.
 * live object가 구 GC 동작처럼 적당한 영역으로 이동한다.
@@ -113,6 +114,7 @@
 
 
 ##### Old GC
+
 * Old GC는 다섯 단계로 구성된다.
 * 대부분의 단계는 필요 시에 Young GC 실행 시에 piggyback되어 실행되므로 Young GC의 parallel gc thread들이 실행한다.
 * 다만 시간이 많이 걸릴 수 있고 stop-the-world가 필요없는 mark 단계는 별도의 쓰레드를 통해 실행된다.
