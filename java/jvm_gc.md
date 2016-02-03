@@ -121,14 +121,14 @@
 * gc log에는 `[GC pause (young)]`으로 표시
 
 
-##### Old GC
+##### Old Generation GC
 
-* Old GC는 다섯 단계로 구성된다.
+* Old Generation GC는 다섯 단계로 구성된다.
 * 대부분의 단계는 필요 시에 Young GC 실행 시에 piggyback되어 실행되므로 Young GC의 parallel gc thread들이 실행한다.
 * 다만 시간이 많이 걸릴 수 있고 stop-the-world가 필요없는 mark 단계는 별도의 쓰레드를 통해 실행된다.
 * `-XX:ConcGCThreads=8` 와 같이 옵션을 통해 Old generation marking 단계에 사용되는 GC 쓰레드 갯수를 조정한다.
 * gc log에는 young GC에 piggyback되는 초기 mark 단계는 `[GC pause (young) (initial-mark)]`으로 표시되고, 마찬가지로 young GC에 piggyback되는 copy/cleanup 단계는 `[GC pause (mixed)]`로 표시된다.
-
+* `-XX:NewRatio=n` 비율에 따라서 OldGen GC가 수행된다.
 
 1. Initial Marking Phase (Stop-the-world)
   + 다중쓰레드로 동작한다. 
@@ -167,3 +167,4 @@
 # 참고
 
 * G1: http://logonjava.blogspot.kr/2015/08/java-g1-gc-full-gc.html
+* http://yckwon2nd.blogspot.kr/2014/04/garbage-collection.html
