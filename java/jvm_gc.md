@@ -129,32 +129,29 @@
 * `-XX:ConcGCThreads=8` 와 같이 옵션을 통해 Old generation marking 단계에 사용되는 GC 쓰레드 갯수를 조정한다.
 * gc log에는 young GC에 piggyback되는 초기 mark 단계는 `[GC pause (young) (initial-mark)]`으로 표시되고, 마찬가지로 young GC에 piggyback되는 copy/cleanup 단계는 `[GC pause (mixed)]`로 표시된다.
 
-1. initial Mark 
+
+1. Initial Marking Phase (Stop-the-world)
   + 다중쓰레드로 동작한다. 
   + Reference를 가지는 Survivor Regions(Root Region)을 Mark. 
   + Old GC가 필요해지면 Young GC 때 함께 실행
-2. Root region scan
-  + Old Generation의 Reference를 가지는 Survivor Region을 검색한다. 
-  + Young GC 전에 수행이 완료되어야 함. 
-  + 다중쓰레드로 동작하며 애플리케이션과 concurrent하게 동작
-3. Concurrent Mark: 
+  + `[GC pause (young) (initial-mark)]`
+2. Concurrent Marking Phase
   + 다중쓰레드로 동작, reachable, live 객체를 마킹한다. 
   + 빈 region들을 찾아 표기하고 region별 live object 비율을 계산해둔다.
   + 이 region들은 바로 다음 Remark 단계에서 제거
-  + Young GC와 동시에 실행
-4. Remark: 
-  + Stop the world.
-  + Heap내의 live 객체에 마킹을 완료하는 단계. 
+  + 별도의 concurrent GC thread들이 실행
+3. Remark Phase (Stop-the-world)
   + 빈 region들은 삭제해서 free로 만든다.
   + 전체 region들의 live object 비율이 계산된다.
   + G1은 SATB(Snapshot-At-The-Beginning) 알고리즘을 사용
-5. Clean up  
-   + Stop the world
-   + Remembered Set을 정리 
-   + Empty Region을 재정리(조각모음) 하여 이 Region을 Free List에 추가(Concurrent)
-6. copy 
-   + 선택된 region들의 compaction이 완료된 시점. 
-   + young과 old generation이 모두 cleanup되고 선택된 region들은 모두 새로운 region으로 compaction되어 위치한다.
+4. Copying/Cleanup Phase (Stop-the-world)
+  + 가장 빨리 청소가 가능한 live object 비율이 낮은 region들을 선택한다.
+  + Young GC 때 선택한 region들을 청소한다.
+  + [GC pause (mixed)]
+5. After Copying/Cleanup Phase
+  + 선택된 region들의 compaction이 완료된 시점.
+  + young과 old generation이 모두 cleanup되고 선택된 region들은 모두 새로운 region으로 compaction되어 위치한다.
+
 
 ##### Full GC
 
