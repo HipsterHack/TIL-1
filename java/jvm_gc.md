@@ -60,13 +60,14 @@
 7. 반복한다. 
 
 #### Major GC
-* 에덴과 Survivor 영역이 
-* 일명 Full GC, Stop the world를 일어나게한다.
+* Old 영역 부족, Perm 영역 부족에 의하여 발생
+* 보통 Mark-Sweep-Compat 과정을 거친다. 상대적으로 단순. (참조가 없는 객체를 표시하고, 표시된 객체를 삭제하며, 한곳에 몰아넣는 조각모음 같은 일을 함)
+* Stop the world를 일어나게한다.
 * Old Gen 영역에서 할때 Reference가 없는걸 찾아서 해제하면서 주로 일어난다.
-* 보통 Mark-Sweep-Compat 과정을 거치면서(참조가 없는 객체를 표시하고, 표시된 객체를 삭제하며, 한곳에 몰아넣는 조각모음 같은 일을 함)
-
+* Minor GC + Major GC가 합쳐서 full gc라고 하고 보통 같이 일어나기 때문에 Major GC가 Full GC라고 여기는 경우가 많다. 
 
 ### 알고리즘
+
 #### Serial GC
 
 * 쓰레드 1개로 MSC 알고리즘을 이용해서 GC를 수행하는 경우이다.
@@ -83,7 +84,7 @@
 * Mark-Summary-Compaction 알고리즘을 이용한다.
 * `-XX:+UseParallelOldGC`
 
-#### CMS GC 
+#### CMS GC(Concurrent Mark Sweep GC) 
 * 위의 3가지 GC와의 다른 점은 Compaction 작업을 수행하지 않는다.
 * memory사용과 cpu 사용이 높다. 메모리 단편화가 발생해서 큰 크기의 객체를 만들지 못할 수도 있다.
 ```
@@ -95,10 +96,10 @@
 ```
 
 ##### GC 과정
-1. initial Mark : Stop the world, ClassLoader 근처 객체 중 살아있는 객체를 찾는다,
-2. concurrent mark: initial Mark 객체를 따라가면서 참조 객체를 찾아간다.(다중쓰레드로 동작)
+1. initial Mark : Stop the world, ClassLoader에 가장 가까운 객체 중 살아있는 객체를 찾는다,
+2. concurrent mark: initial Mark한 객체를 따라가면서 참조 객체를 찾아간다.(다중쓰레드로 동작)
 3. remark: 2번 단계에서 추가되거나 참조가 끊긴 객체를 확인한다.(Stop the world)
-4. concurrent sweep: 3에서 확인한 참조가 끊긴 객체를 섹제한다.
+4. concurrent sweep: 3에서 확인한 참조가 끊긴 객체를 삭제한다.
 
 #### G1 GC
 * 아래는 G1 GC를 사용했을때의 메모리구조다.
