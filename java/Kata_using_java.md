@@ -64,3 +64,31 @@ public class FunctionalProgramming {
 
 }
 ```
+
+# 카타4
+
+* `array1`, `array2`를 파라미터로 받는다.
+* `array1`의 요소가 `array2`의 요소의 부분 문자열만 남긴다.
+* 결과 값은 정렬된 array를 돌려준다. 
+
+```
+import java.util.HashSet;
+import java.util.Arrays;
+
+public class WhichAreIn { 
+	
+	public static String[] inArray(String[] array1, String[] array2) {
+			HashSet<String> set = new HashSet<String>();
+			for (int i = 0; i < array1.length; i++) {
+				for (int j = 0; j < array2.length; j++) {
+					if (array2[j].contains(array1[i])) {
+						set.add(array1[i]);
+					}
+				}
+			}
+			String[] result = set.toArray(new String[set.size()]);
+			Arrays.sort(result);
+			return result;
+	}
+}
+```
