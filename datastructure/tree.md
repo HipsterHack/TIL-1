@@ -45,6 +45,38 @@ https://ko.wikipedia.org/wiki/%EC%9D%B4%EC%A7%84_%ED%8A%B8%EB%A6%AC
 ### Binary Search Tree
 * sorted binary trees or ordered binary trees.
 * 각 노드에 값이 있고 왼쪽엔 노드보다 작은 값이, 오른쪽엔 노드보다 큰 값이 보통 들어간다. 중복 노드가 있어서는 안된다.
+#### Binary Search Tree 인지 판별 하는 방법
+
+* 바이너리 서치 트리는 값이  ` left <= root < right ` 의 수식을 만족해야한다.
+* 이 규칙을 이용해서 트리가 바이너리 서치 트리인지 아닌지를 판별할 수 있다.
+* 아래는 자식 노드의 값을 이용해 크기를 비교해서 validate를 체크하는 예제
+```
+public class TreeNode {
+  int value;
+  TreeNode left;
+  TreeNode right;
+}
+public class BinarySearchTree {
+	public static boolean validate(TreeNode root) {
+		if (root != null) {
+			// 왼쪽
+			if (root.left != null && (root.left.value > root.value || !validate(root.left))) {
+				return false;
+			}
+			if (root.right != null && (root.right.value <= root.value || !validate(root.right))) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+}
+```
+
+
+
+#### 성능
 
 |      |Average  | Worst case|
 |------|---------|-----------|
@@ -52,6 +84,8 @@ https://ko.wikipedia.org/wiki/%EC%9D%B4%EC%A7%84_%ED%8A%B8%EB%A6%AC
 |Search| O(log n)|	O(n)     |
 |Insert| O(log n)|	O(n)     |
 |Delete| O(log n)|	O(n)     |
+
+
 
 
 ### B-Tree
