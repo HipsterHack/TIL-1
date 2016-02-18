@@ -92,3 +92,33 @@ public class WhichAreIn {
 	}
 }
 ```
+
+# 카타5
+* 거북이 A, B가 경주를 한다.  A가 B보다 앞서 있고, B 속도가 A속도보다 빠르다. B가 A를 언제쯤 따라잡을 수 있는가?
+* 예를 들면 아래와 같다.
+* 거북이 A가 1시간마다 720 feet 간다
+* 거북이 B는 1시간마다 850 feet 간다
+* 거북이 A는 B보다 70 feet 앞서 있다.
+* 자 그럼 몇시간 몇분 몇초 만에 거북이 B가 따라잡는가?
+
+## 풀이
+* `속력 * 시간 = 거리` 공식을 이용한다.
+
+```
+public class Tortoise {
+    public static final int HOUR_SECOND = 3600;
+    public static final int MINUTE_SECOND = 60;
+    
+    public static int[] race(int v1, int v2, int g) {
+        if ( v1 >= v2 ) return null;
+        
+        float sec = g * HOUR_SECOND / (v2 - v1);
+        return new int[] { 
+          (int)(sec / HOUR_SECOND), 
+          (int)((sec % HOUR_SECOND) / MINUTE_SECOND), 
+          (int)((sec % HOUR_SECOND) % MINUTE_SECOND)  
+          };
+    }
+}
+```
+
