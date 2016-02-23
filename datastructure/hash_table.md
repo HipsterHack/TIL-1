@@ -63,6 +63,19 @@
 |Insert|O(1)   | O(n)|
 |Delete|O(1)   | O(n)|
 
+### 기초적인 hash 함수
+ 수학적으로는 여러 해쉬함수들이 있지만 가장 기본적인 해쉬함수다. 
+```
+String key;
+char[] ch = key.toChar();
+int hash = 0;
+for(int i=0;i<key.length;i++)
+ hash = hash*31 + char[i];
+```
+ 
+### 성능 향상 법
+* 자주쓰는 키는 get, put에서 캐시하고 있으면 성능이 좋아진다. 
+ 
 ## 참고
 
 http://d2.naver.com/helloworld/831311
