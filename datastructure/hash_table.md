@@ -64,13 +64,32 @@
 |Delete|O(1)   | O(n)|
 
 ### 기초적인 hash 함수
- 수학적으로는 여러 해쉬함수들이 있지만 가장 기본적인 해쉬함수다. 
+* 수학적으로는 여러 해쉬함수들이 있지만 가장 기본적인 해쉬함수다. 
 ```
 String key;
 char[] ch = key.toChar();
 int hash = 0;
 for(int i=0;i<key.length;i++)
  hash = hash*31 + char[i];
+```
+
+* effective java에서의 hash 함수
+
+1. `int result` 를 값에 선언하고 0이 아닌 값을 넣는다
+2. 모든 field에 대해서 값을 계산한다.
+   2.1 boolean이면 `field? 0 : 1`로 환산
+   2.2 byte, char, int 이면 `(int)field`값사용
+   2.3 long 이면 `(int) (f ^ ( f >>> 32))`
+   2.4 float 이면 `Float.floatToIntBits(f)` double이면 `Double.doubleToLongBits(f)`
+   2.5 object 면 `hashCode()` 값사용
+   2.6 array 면 hash 값을 계산해서 합침
+3. 아래 값을 곱해서 return
+`result = 37 * result + c`
+
+
+
+```
+
 ```
  
 ### 성능 향상 법
