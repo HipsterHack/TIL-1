@@ -6,6 +6,8 @@ Slick은 ORM이라기 보다는 Functional-relational mapper(FRM?) 이다.
 
 
 ## 매핑 방법 
+
+![이미지](https://github.com/DanSeo/TIL/blob/master/ORM/from-sql-to-slick.person-address.png)
 * 아래는 매핑 예제다.
 
 ```
