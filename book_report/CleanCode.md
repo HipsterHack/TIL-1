@@ -320,3 +320,73 @@ public boolean set(String name, String value);
 ### 아직 존재하지 않는 코드 사용하기 
 
 - 우리가 원하는 형태로 인터페이스와 패키지를 분리해서 Fake 어댑터를 만들어서 분리하여 테스트 한다
+
+# 9장 단위 테스트 
+
+## TDD 3법칙 
+
+1. 실패하는 단위 테스트를 작성할 때 까지 실제 코드를 작성하지 않는다.
+2. 컴파일은 실패하지 않으면서 실행이 실패하는 정도로만 단위 테스트를 작성한다
+3. 현재 실패하는 테스트를 통과할 정도만 실제코드를 만든다.
+
+
+- 위 3가지 법칙을 따르면 대략 30초 주기로 묶인다. 테스트 코드와 실제 코드가 함께 나올뿐더러 테스트 코드가 실제 코드보다 불과 몇 초전에 나온다.
+- 이렇게 일하면 매일 수십개 매달 수백개.의 테스트 케이스가 나온다.
+- 이런 테스트 코드는 관리문제를 유발 시키기도 한다.
+
+## 깨끗한 테스트 코드 유지하기
+* 테스트 코드는 실제 코드 만큼 중요하다.
+* 테스트는 유연성 유지보수성, 재사용성을 제공한다.
+* 테스트케이스로 인해 변경이 쉬워진다.
+
+* 깨끗한 테스트 코드를 만들려면 무조건 무조건 가독성에 신경을 써야 한다. 
+  + 도메인 특화 언어를 사용해서 테스트 코드를 구현하면 도움이 된다. 
+      + 테스트 코드가 어떤 의미인지 바로 알아챌수 있게 만드는게 중요하다.
+  + 이중 표준을 만들어라.
+  		+ 테스트 환경은 실제 환경과 다르다는걸 인지하고 만든다.  		
+  + 한 개념당 가능하면 적은 assert 를 유지해라
+    + 가능하면 줄여라. (아래는 예제다)
+    + 중복이 생긴다면? template method 등으로 중복 코드를 뽑아내라. 테스트 코드를 일반 코드 수준으로 중복을 줄이라는 것이다.
+```
+public void testGetPageHierarchyAsXml() throws Exception {
+   givenPages("PageOne", "PageOne.ChildOne", "PageTwo");
+   whenRequestIsIssued("root", "type:pages");
+   thenResponseShouldBeXML();
+}
+
+public void testGetPageHierarchyHasRightTags() throws Exception {
+  givenPages("PageOne", "PageOne.ChildOne", "PageTwo");
+  whenRequestIsIssued("root", "type:pages");
+  thenResponseShouldContain(
+    "<name>PageOne</name>", "<name>PageTwo</name>", "<name>ChildOne</name>"
+    );
+```  
+
+## Build Operate check 패턴
+  - 테스트 자료를 만들고
+  - 데이터를 조작하고 
+  - 올바른 결과가 맞는지 확인한다.
+ 
+
+## FISRT
+* 깨끗한 코드를 만드는 5가지 원칙
+
+### 빠르게 (Fast)
+* 테스트는 빨라야 한다. 그래야 자주 실행 가능하니까.
+
+### 독립적으로 (Independent)
+* 각 테스트가 서로 의존하면 안된다. 
+  + 의존성이 생기면 원인을 찾는게 어려워진다.
+
+### 반복가능하게 (Repeatable)
+* 어떤 환경에서도 반복가능해야한다.
+  + 이런 상태를 유지하기 어렵다.
+
+### 자가 검증하는 (Self-Validating)
+* 테스트는 불 값으로 결과를 내야한다. 성공 아니면 실패다. 
+
+### 적시에 (Timely)
+* 테스트는 적시에 작성해야한다.
+* 테스트하는 코드를 구현 직전에 만들어야 한다. 그게 아니라면 테스트 코드 만드는게 참 어려운일이 될 것이다. 
+
+
