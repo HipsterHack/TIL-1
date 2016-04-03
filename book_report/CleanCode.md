@@ -389,4 +389,347 @@ public void testGetPageHierarchyHasRightTags() throws Exception {
 * 테스트는 적시에 작성해야한다.
 * 테스트하는 코드를 구현 직전에 만들어야 한다. 그게 아니라면 테스트 코드 만드는게 참 어려운일이 될 것이다. 
 
+# 10장 클래스 
 
+자바의 경우 아래 순서로 코드를 쓴다.
+- 공개 정적 상수 목록
+- 정적 비공개 변수
+- 비공개 인스턴스 변수
+- 공개 함수
+
+## 캡슐화
+
+* 변수와 유틸리티 함수는 가급적 비공개로 만들어야 한다.
+* 같은 패키지 안에서 사용해야 한다면 protected 선언하여 테스트 코드가 접근할 수 있게 한다.
+* 캡슐화를 풀어주는 것은 마지막에 해야한다.
+
+## 클래스의 최소화
+
+### 단일 책임 원칙
+
+* 클래스나 모듈을 변경할 이유가 단하나 여야 한다. 책임이 1개라는 이야기.
+* 책임을 파악하라다보면 코드 추상화가 쉬워진다.
+* 클래스 이름은 클래스 책임을 기술해야 한다. 
+  + processor, Manager, Super가 들어가면 클래스에 여러 책임이 있다는 증거다.
+* 큰 클래스 몇개가 아니라 작은 클래스 여러개로 만들어진 시스템이 바람직하다. 
+  + 작은 클래스는 책임이 한개고 다른 작은 클래스와 협력해서 시스템을 동작 시킨다.
+
+### 응집도
+
+* 클래스는 인스턴스 변수 수가 작아야 한다. 
+* 각 클래스 메소드는 클래스 인스턴스 변수를 한개 이상 사용해야 한다.
+* 일반적으로 메소드가 변수를 많이 사용할수록 메소드와 클래스는 응집도가 높다.
+* 하지만 응집도가 가장 높은 클래스는 가능하지도 바람직하지도 않다. 
+* 함수를 작게 매개변수 목록을 짧게 라는 전략을 쓰다보면 몇몇 메소드에서만 사용하는 인스턴스 변수가 많아진다. 
+  + 이런 경우 대부분은 새로운 클래스로 쪼개야 한다는 거다.
+
+#### 응집도를 유지하면 여러 작은 클래스가 나온다.
+
+* 큰 함수를 작은 함수 여럿으로 나누기만 하면 클래스 수가 많아진다.
+  + extract method를 한다고 생각하자.뽑을 위치의 코드는 큰 함수의 변수를 몇개 사용하는데 이를 매개변수로 큰 함수에서 넘겨야 할까?
+  + 아니다. 인스턴스 변수로 승격시키자. 그러면 함수를 쪼개기 쉬워진다. 
+  + 이러면 응집도가 떨어진다. 그러면? 독자 클래스로 분리 시키자.
+  + 정리하면 extract method를 진행하다가 응집도가 떨어지기 시작한다면 클래스를 분리해내자.
+
+
+```
+package literatePrimes;
+
+public class PrintPrimes {
+	public static void main(String[] args) {
+		final int M = 1000;
+		final int RR = 50;
+		final int CC = 4;
+		final int WW = 10;
+		final int ORDMAX = 30;
+		int P[] = new int[M + 1];
+		int PAGENUMBER;
+		int PAGEOFFSET;
+		int ROWOFFSET;
+		int C;
+		int J;
+		int K;
+		boolean JPRIME;
+		int ORD;
+		int SQUARE;
+		int N;
+		int MULT[] = new int[ORDMAX + 1];
+		J = 1;
+		K = 1;
+		P[1] = 2;
+		ORD = 2;
+		SQUARE = 9;
+		while (K < M) {
+			do {
+				J = J + 2;
+				if (J == SQUARE) {
+					ORD = ORD + 1;
+					SQUARE = P[ORD] * P[ORD];
+					MULT[ORD - 1] = J;
+				}
+				N = 2;
+				JPRIME = true;
+				while (N < ORD && JPRIME) {
+					while (MULT[N] < J)
+						MULT[N] = MULT[N] + P[N] + P[N];
+					if (MULT[N] == J)
+						JPRIME = false;
+					N = N + 1;
+				}
+			} while (!JPRIME);
+			K = K + 1;
+			P[K] = J;
+		}
+		{
+			PAGENUMBER = 1;
+			PAGEOFFSET = 1;
+			while (PAGEOFFSET <= M) {
+				System.out.println("The First " + M + " Prime Numbers --- Page " + PAGENUMBER);
+				System.out.println("");
+				for (ROWOFFSET = PAGEOFFSET; ROWOFFSET < PAGEOFFSET + RR; ROWOFFSET++) {
+					for (C = 0; C < CC; C++)
+						if (ROWOFFSET + C * RR <= M)
+							System.out.format("%10d", P[ROWOFFSET + C * RR]);
+					System.out.println("");
+				}
+				System.out.println("\f");
+				PAGENUMBER = PAGENUMBER + 1;
+				PAGEOFFSET = PAGEOFFSET + RR * CC;
+			}
+		}
+	}
+}
+```
+
+위의 내용을 리팩토링하자. 서술적인 이름을 사용하고 클래스를 분리하자 
+
+```
+public class PrimePrinter {
+	public static void main(String[] args) {
+		final int NUMBER_OF_PRIMES = 1000;
+		int[] primes = PrimeGenerator.generate(NUMBER_OF_PRIMES);
+		final int ROWS_PER_PAGE = 50;
+		final int COLUMNS_PER_PAGE = 4;
+		RowColumnPagePrinter tablePrinter = new RowColumnPagePrinter(ROWS_PER_PAGE, COLUMNS_PER_PAGE,
+				"The First " + NUMBER_OF_PRIMES + " Prime Numbers");
+		tablePrinter.print(primes);
+	}
+}
+
+import java.io.PrintStream;
+
+public class RowColumnPagePrinter {
+	private int rowsPerPage;
+	private int columnsPerPage;
+	private int numbersPerPage;
+	private String pageHeader;
+	private PrintStream printStream;
+
+	public RowColumnPagePrinter(int rowsPerPage, int columnsPerPage, String pageHeader) {
+		this.rowsPerPage = rowsPerPage;
+		this.columnsPerPage = columnsPerPage;
+		this.pageHeader = pageHeader;
+		numbersPerPage = rowsPerPage * columnsPerPage;
+		printStream = System.out;
+	}
+
+	public void print(int data[]) {
+		int pageNumber = 1;
+		for (int firstIndexOnPage = 0; firstIndexOnPage < data.length; firstIndexOnPage += numbersPerPage) {
+			int lastIndexOnPage = Math.min(firstIndexOnPage + numbersPerPage - 1, data.length - 1);
+			printPageHeader(pageHeader, pageNumber);
+			printPage(firstIndexOnPage, lastIndexOnPage, data);
+			printStream.println("\f");
+			pageNumber++;
+		}
+	}
+
+	private void printPage(int firstIndexOnPage, int lastIndexOnPage, int[] data) {
+		int firstIndexOfLastRowOnPage = firstIndexOnPage + rowsPerPage - 1;
+		for (int firstIndexInRow = firstIndexOnPage; firstIndexInRow <= firstIndexOfLastRowOnPage; firstIndexInRow++) {
+			printRow(firstIndexInRow, lastIndexOnPage, data);
+			printStream.println("");
+		}
+	}
+
+	private void printRow(int firstIndexInRow, int lastIndexOnPage, int[] data) {
+		for (int column = 0; column < columnsPerPage; column++) {
+			int index = firstIndexInRow + column * rowsPerPage;
+			if (index <= lastIndexOnPage)
+				printStream.format("%10d", data[index]);
+		}
+	}
+
+	private void printPageHeader(String pageHeader, int pageNumber) {
+		printStream.println(pageHeader + " --- Page " + pageNumber);
+		printStream.println("");
+	}
+
+	public void setOutput(PrintStream printStream) {
+		this.printStream = printStream;
+	}
+}
+
+import java.util.ArrayList;
+
+public class PrimeGenerator {
+	private static int[] primes;
+	private static ArrayList<Integer> multiplesOfPrimeFactors;
+
+	protected static int[] generate(int n) {
+		primes = new int[n];
+		multiplesOfPrimeFactors = new ArrayList<Integer>();
+		set2AsFirstPrime();
+		checkOddNumbersForSubsequentPrimes();
+		return primes;
+	}
+
+	private static void set2AsFirstPrime() {
+		primes[0] = 2;
+		multiplesOfPrimeFactors.add(2);
+	}
+
+	private static void checkOddNumbersForSubsequentPrimes() {
+		int primeIndex = 1;
+		for (int candidate = 3; primeIndex < primes.length; candidate += 2) {
+			if (isPrime(candidate))
+				primes[primeIndex++] = candidate;
+		}
+	}
+
+	private static boolean isPrime(int candidate) {
+		if (isLeastRelevantMultipleOfNextLargerPrimeFactor(candidate)) {
+			multiplesOfPrimeFactors.add(candidate);
+			return false;
+		}
+		return isNotMultipleOfAnyPreviousPrimeFactor(candidate);
+	}
+
+	private static boolean isLeastRelevantMultipleOfNextLargerPrimeFactor(int candidate) {
+		int nextLargerPrimeFactor = primes[multiplesOfPrimeFactors.size()];
+		int leastRelevantMultiple = nextLargerPrimeFactor * nextLargerPrimeFactor;
+		return candidate == leastRelevantMultiple;
+	}
+
+	private static boolean isNotMultipleOfAnyPreviousPrimeFactor(int candidate) {
+		for (int n = 1; n < multiplesOfPrimeFactors.size(); n++) {
+			if (isMultipleOfNthPrimeFactor(candidate, n))
+				return false;
+		}
+		return true;
+	}
+
+	private static boolean isMultipleOfNthPrimeFactor(int candidate, int n) {
+		return candidate == smallestOddNthMultipleNotLessThanCandidate(candidate, n);
+	}
+
+	private static int smallestOddNthMultipleNotLessThanCandidate(int candidate, int n) {
+		int multiple = multiplesOfPrimeFactors.get(n);
+		while (multiple < candidate)
+			multiple += 2 * primes[n];
+		multiplesOfPrimeFactors.set(n, multiple);
+		return multiple;
+	}
+}
+
+```
+
+### 변경하기 쉬운 클래스
+
+* 클래스 일부에서 사용하는 비공개 메소드는 코드를 개선할 여지를 얘기한다.
+ + 하지만 실제로 개선해야할 시점은 시스템이 변해서라야 한다.
+* OCP 원칙을 지원해야한다. 확장에는 개방적이고 수정에 폐쇄적이어야 한다.
+* 새 기능을 추가하거나 기존 기능을 변경할때 건드릴 코드가 최소인 구조가 바람직하다.
+
+아래는 OCP 원칙을 지키면서 클래스를 리팩토링 한것을 보여준다.
+
+```
+public class Sql {
+	public Sql(String table, Column[] columns)	
+	public String create()	
+	public String insert(Object[] fields)	
+	public String selectAll()	
+	public String findByKey(String keyColumn, String keyValue)	
+	public String select(Column column, String pattern)	
+	public String select(Criteria criteria)	
+	public String preparedInsert()	
+	private String columnList(Column[] columns)	
+	private String valuesList(Object[] fields, final Column[] columns)	
+	private String selectWithCriteria(String criteria)	
+	private String placeholderList(Column[] columns)
+}
+ ```
+
+위의 개선버전은 아래와 같다.
+새로 쿼리가 추가 되도 클래스만 추가하면 된다. 
+
+```
+abstract public class Sql {
+	public Sql(String table, Column[] columns)
+	abstract public String generate();
+}
+
+public class CreateSql extends Sql {
+	public CreateSql(String table, Column[] columns)
+	@Override 
+	public String generate()
+}
+public class SelectSql extends Sql {
+	public SelectSql(String table, Column[] columns)
+	@Override 
+	public String generate()
+}
+
+public class InsertSql extends Sql {
+	public InsertSql(String table, Column[] columns, Object[] fields)
+	@Override 
+	public String generate()
+	private String valuesList(Object[] fields, final Column[] columns)
+}
+
+public class SelectWithCriteriaSql extends Sql {
+	public SelectWithCriteriaSql(
+			String table, Column[] columns, Criteria criteria)
+	@Override 
+	public String generate()
+}
+
+public class SelectWithMatchSql extends Sql {
+	public SelectWithMatchSql(
+			String table, Column[] columns, Column column, String pattern)
+	@Override 
+	public String generate()
+}
+public class FindByKeySql extends Sql
+	public FindByKeySql(
+			String table, Column[] columns, String keyColumn, String keyValue)
+	@Override 
+	public String generate()
+}
+
+public class PreparedInsertSql extends Sql {
+	public PreparedInsertSql(String table, Column[] columns)
+	@Override 
+	public String generate() 
+	private String placeholderList(Column[] columns)
+}
+
+public class Where {
+	public Where(String criteria)
+	public String generate()
+}
+
+public class ColumnList {
+	public ColumnList(Column[] columns)
+	public String generate()
+}
+```
+
+### 변경으로부터 격리
+
+테스트가 가능할정도로 시스템 결합도를 낮추면 유연성과 재사용성이 높아진다.
+결합도가 낮다는 것은 시스템 요소가 다른 요소와 변경으로부터 격리가 잘되어 있단 얘기.
+
+* 클라이언트에게 구체적인 사실을 숨기고 테스트 하기 용이하려면 concrete 클래스에 의존하는걸 가능하면 피해야 한다. 
+ + 인터페이스나 추상클래스를 사용하는건 이때 필요한 것이다.
+ + 추상적인 개념만 가지고 온다고 생각하게 만든다.
